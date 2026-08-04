@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.hardik.the_server_driven_ui.sdui.action.ActionDispatcher
 import com.hardik.the_server_driven_ui.sdui.model.PageContent
 import com.hardik.the_server_driven_ui.sdui.model.SduiNode
@@ -21,10 +22,11 @@ fun SduiPage(
     registry: ComponentRegistry,
     stateStore: SduiStateStore,
     actionDispatcher: ActionDispatcher,
+    modifier: Modifier = Modifier,
 ) {
     val currentState by stateStore.values.collectAsState()
 
-    LazyColumn {
+    LazyColumn(modifier = modifier) {
         items(page.sections, key = { it.id }) { section ->
             RenderNode(
                 node = section,

@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 1,
+  "minClientVersion": 1,
+  "page": {
+    "id": "home_landing",
+    "title": "Cars24 Home",
+    "sections": [
+      {
+        "id": "search_header",
+        "type": "SearchHeader",
+        "props": {
+          "title": "Find your next car",
+          "placeholder": "Search by brand, model or budget"
+        },
+        "actions": {
+          "onClick": { "type": "navigate", "payload": { "route": "search" } }
+        }
+      },
+      {
+        "id": "banner_carousel_promos",
+        "type": "BannerCarousel",
+        "style": { "margin": [0, 8, 0, 8] },
+        "props": {
+          "items": [
+            {
+              "id": "promo_assured",
+              "title": "CARS24 Assured — 140 point inspected",
+              "background": "#2E7D32",
+              "route": "assured_landing"
+            },
+            {
+              "id": "promo_finance",
+              "title": "Car loans from 9.4% interest",
+              "background": "#1565C0",
+              "route": "finance_landing"
+            },
+            {
+              "id": "promo_sell",
+              "title": "Sell your car in 30 minutes",
+              "background": "#EF6C00",
+              "route": "sell_landing"
+            }
+          ]
+        }
+      },
+      {
+        "id": "chip_row_category",
+        "type": "ChipRow",
+        "style": { "padding": [0, 4, 0, 4] },
+        "props": {
+          "defaultSelected": "suv",
+          "items": [
+            { "id": "suv", "label": "SUV", "value": "suv" },
+            { "id": "sedan", "label": "Sedan", "value": "sedan" },
+            { "id": "hatchback", "label": "Hatchback", "value": "hatchback" },
+            { "id": "muv", "label": "MUV", "value": "muv" }
+          ]
+        },
+        "actions": {
+          "onSelect": {
+            "type": "updateState",
+            "target": "selectedCategory",
+            "payloadFromEvent": "value"
+          }
+        }
+      },
+      {
+        "id": "rail_popular_cars",
+        "type": "CarouselRail",
+        "props": { "title": "Popular near you" },
+        "dataBinding": {
+          "stateKey": "selectedCategory",
+          "variants": {
+            "suv": [
+              {
+                "id": "car_creta",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/creta/400/300",
+                  "title": "Hyundai Creta SX 2021",
+                  "subtitle": "32,400 km · Petrol · Automatic",
+                  "price": "₹13.75 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_creta" } } }
+              },
+              {
+                "id": "car_seltos",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/seltos/400/300",
+                  "title": "Kia Seltos HTX 2020",
+                  "subtitle": "41,200 km · Diesel · Manual",
+                  "price": "₹12.10 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_seltos" } } }
+              },
+              {
+                "id": "car_nexon",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/nexon/400/300",
+                  "title": "Tata Nexon XZ+ 2022",
+                  "subtitle": "18,900 km · Petrol · Manual",
+                  "price": "₹9.85 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_nexon" } } }
+              },
+              {
+                "id": "car_xuv700",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/xuv700/400/300",
+                  "title": "Mahindra XUV700 AX7 2022",
+                  "subtitle": "22,050 km · Diesel · Automatic",
+                  "price": "₹19.40 Lakh",
+                  "badge": "New arrival"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_xuv700" } } }
+              }
+            ],
+            "sedan": [
+              {
+                "id": "car_city",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/city/400/300",
+                  "title": "Honda City ZX 2021",
+                  "subtitle": "27,600 km · Petrol · Automatic",
+                  "price": "₹12.90 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_city" } } }
+              },
+              {
+                "id": "car_verna",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/verna/400/300",
+                  "title": "Hyundai Verna SX 2020",
+                  "subtitle": "35,300 km · Petrol · Manual",
+                  "price": "₹9.60 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_verna" } } }
+              },
+              {
+                "id": "car_slavia",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/slavia/400/300",
+                  "title": "Skoda Slavia Style 2022",
+                  "subtitle": "14,200 km · Petrol · Automatic",
+                  "price": "₹14.25 Lakh",
+                  "badge": "New arrival"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_slavia" } } }
+              },
+              {
+                "id": "car_ciaz",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/ciaz/400/300",
+                  "title": "Maruti Suzuki Ciaz Alpha 2019",
+                  "subtitle": "48,700 km · Petrol · Manual",
+                  "price": "₹8.15 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_ciaz" } } }
+              }
+            ],
+            "hatchback": [
+              {
+                "id": "car_swift",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/swift/400/300",
+                  "title": "Maruti Suzuki Swift VXI 2021",
+                  "subtitle": "24,800 km · Petrol · Manual",
+                  "price": "₹6.45 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_swift" } } }
+              },
+              {
+                "id": "car_i20",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/i20/400/300",
+                  "title": "Hyundai i20 Sportz 2022",
+                  "subtitle": "16,500 km · Petrol · Manual",
+                  "price": "₹7.90 Lakh",
+                  "badge": "New arrival"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_i20" } } }
+              },
+              {
+                "id": "car_altroz",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/altroz/400/300",
+                  "title": "Tata Altroz XZ 2021",
+                  "subtitle": "21,300 km · Diesel · Manual",
+                  "price": "₹6.95 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_altroz" } } }
+              },
+              {
+                "id": "car_baleno",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/baleno/400/300",
+                  "title": "Maruti Suzuki Baleno Delta 2020",
+                  "subtitle": "30,100 km · Petrol · Manual",
+                  "price": "₹6.10 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_baleno" } } }
+              }
+            ],
+            "muv": [
+              {
+                "id": "car_ertiga",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/ertiga/400/300",
+                  "title": "Maruti Suzuki Ertiga ZXI 2021",
+                  "subtitle": "29,400 km · Petrol · Manual",
+                  "price": "₹9.35 Lakh",
+                  "badge": "Assured"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_ertiga" } } }
+              },
+              {
+                "id": "car_innova",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/innova/400/300",
+                  "title": "Toyota Innova Crysta GX 2020",
+                  "subtitle": "52,000 km · Diesel · Manual",
+                  "price": "₹17.80 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_innova" } } }
+              },
+              {
+                "id": "car_carens",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/carens/400/300",
+                  "title": "Kia Carens Luxury Plus 2022",
+                  "subtitle": "12,700 km · Diesel · Automatic",
+                  "price": "₹15.60 Lakh",
+                  "badge": "New arrival"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_carens" } } }
+              },
+              {
+                "id": "car_xl6",
+                "type": "CarCard",
+                "props": {
+                  "imageUrl": "https://picsum.photos/seed/xl6/400/300",
+                  "title": "Maruti Suzuki XL6 Alpha 2021",
+                  "subtitle": "26,900 km · Petrol · Automatic",
+                  "price": "₹11.20 Lakh"
+                },
+                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_xl6" } } }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "value_prop_strip",
+        "type": "ValuePropStrip",
+        "style": { "padding": [0, 8, 0, 8] },
+        "props": {
+          "items": [
+            { "icon": "🛡️", "label": "140-point\ninspected" },
+            { "icon": "🔄", "label": "5-day money\nback" },
+            { "icon": "📄", "label": "1-year\nwarranty" },
+            { "icon": "🚚", "label": "Free home\ndelivery" }
+          ]
+        }
+      },
+      {
+        "id": "cta_check_emi",
+        "type": "Button",
+        "style": { "margin": [16, 8, 16, 8] },
+        "props": { "label": "Calculate EMI — Hyundai Creta ₹13.75L" },
+        "actions": {
+          "onClick": { "type": "openSheet", "target": "sheet_emi_creta" }
+        },
+        "children": [
+          {
+            "id": "sheet_emi_creta",
+            "type": "Column",
+            "style": { "padding": [20, 20, 20, 24] },
+            "props": {},
+            "children": [
+              {
+                "id": "sheet_title",
+                "type": "Text",
+                "props": { "text": "Hyundai Creta SX 2021 · ₹13.75 Lakh", "size": 18, "weight": "bold" }
+              },
+              { "id": "sheet_spacer_1", "type": "Spacer", "props": { "height": 12 } },
+              {
+                "id": "sheet_tenure_label",
+                "type": "Text",
+                "props": { "text": "Choose loan tenure", "size": 13, "color": "#616161" }
+              },
+              { "id": "sheet_spacer_2", "type": "Spacer", "props": { "height": 8 } },
+              {
+                "id": "sheet_tenure_chip_row",
+                "type": "ChipRow",
+                "style": { "padding": [0, 0, 0, 0] },
+                "props": {
+                  "defaultSelected": "36",
+                  "items": [
+                    { "id": "t12", "label": "12 months", "value": "12" },
+                    { "id": "t36", "label": "36 months", "value": "36" },
+                    { "id": "t60", "label": "60 months", "value": "60" },
+                    { "id": "t84", "label": "84 months", "value": "84" }
+                  ]
+                },
+                "actions": {
+                  "onSelect": {
+                    "type": "updateState",
+                    "target": "selectedTenure",
+                    "payloadFromEvent": "value"
+                  }
+                }
+              },
+              { "id": "sheet_spacer_3", "type": "Spacer", "props": { "height": 16 } },
+              {
+                "id": "sheet_emi_result",
+                "type": "Column",
+                "props": {},
+                "dataBinding": {
+                  "stateKey": "selectedTenure",
+                  "variants": {
+                    "default": [
+                      { "id": "emi_default", "type": "Text", "props": { "text": "EMI: ₹44,150 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                    ],
+                    "12": [
+                      { "id": "emi_12", "type": "Text", "props": { "text": "EMI: ₹1,20,850 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                    ],
+                    "36": [
+                      { "id": "emi_36", "type": "Text", "props": { "text": "EMI: ₹44,150 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                    ],
+                    "60": [
+                      { "id": "emi_60", "type": "Text", "props": { "text": "EMI: ₹28,900 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                    ],
+                    "84": [
+                      { "id": "emi_84", "type": "Text", "props": { "text": "EMI: ₹21,750 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "grid_certified_cars",
+        "type": "Grid",
+        "props": { "title": "Certified cars this week", "columns": 2, "rows": 2 },
+        "children": [
+          {
+            "id": "car_grid_venue",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/venue/400/300",
+              "title": "Hyundai Venue S 2021",
+              "subtitle": "19,800 km · Petrol",
+              "price": "₹8.75 Lakh",
+              "badge": "Assured"
+            },
+            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_venue" } } }
+          },
+          {
+            "id": "car_grid_brezza",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/brezza/400/300",
+              "title": "Maruti Suzuki Brezza ZXI 2022",
+              "subtitle": "9,300 km · Petrol",
+              "price": "₹10.90 Lakh",
+              "badge": "New arrival"
+            },
+            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_brezza" } } }
+          },
+          {
+            "id": "car_grid_thar",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/thar/400/300",
+              "title": "Mahindra Thar LX 2021",
+              "subtitle": "15,600 km · Diesel",
+              "price": "₹14.10 Lakh"
+            },
+            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_thar" } } }
+          },
+          {
+            "id": "car_grid_punch",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/punch/400/300",
+              "title": "Tata Punch Creative 2022",
+              "subtitle": "11,200 km · Petrol",
+              "price": "₹7.35 Lakh",
+              "badge": "Assured"
+            },
+            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_punch" } } }
+          }
+        ]
+      },
+      {
+        "id": "unknown_type_demo_live_auction",
+        "type": "LiveAuctionWidget",
+        "minClientVersion": 7,
+        "props": {
+          "note": "Deliberately unrecognized type — proves the unknown-component fallback: this section is skipped without breaking the rest of the page."
+        }
+      },
+      {
+        "id": "footer_cta_sell",
+        "type": "FooterCta",
+        "style": { "margin": [0, 8, 0, 24] },
+        "props": {
+          "title": "Have a car to sell?",
+          "subtitle": "Get the best price, doorstep pickup, instant payment.",
+          "buttonLabel": "Get a free quote",
+          "background": "#FFE0B2"
+        },
+        "actions": {
+          "onClick": { "type": "navigate", "payload": { "route": "sell_flow" } }
+        }
+      }
+    ]
+  }
+}
