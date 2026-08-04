@@ -36,7 +36,7 @@ proper Macrobenchmark harness. If time allows later, swapping this for a
 `isMinifyEnabled` change needed for this to be meaningful (currently
 `false` — see trade-off note).
 
-**Device**: *(fill in: model, Android version, e.g. "Pixel 7a, Android 15")*
+**Device**: motorola edge 60 fusion, Android 16 (physical device, `adb`-connected)
 
 **Procedure per run** (repeat 5x per activity, cold start each time):
 
@@ -80,19 +80,60 @@ shell's perspective) — record that alongside the logcat lines.
 | Full page time | TBD ms | TBD ms | TBD % |
 | JSON read+parse | n/a | TBD ms | — |
 | View-build (est.) | TBD ms | TBD ms | TBD % |
-| Dropped frames / 1000 (scroll) | TBD | TBD | TBD |
+| Dropped frames / 1000 (scroll) | n/a (see note) | debug: 148/1000 (14.84%) legacy-janky · release: 11/1000 (1.15%) | — |
 
 ## Measure → optimize loop
 
 *(fill in as you actually do this — this section is scored on honesty, not
 on the numbers looking good)*
 
-- What you tried:
-- What worked:
-- What didn't, and why:
+- What you tried: reported scroll jank on the SDUI landing page. Reproduced
+  with `adb shell input swipe` (23 synthetic swipes through the full page)
+  and read `adb shell dumpsys gfxinfo <pkg>` (reset immediately after cold
+  start settles, so the one-time JSON-parse/first-compose frame doesn't
+  pollute the scroll-only stats) on the debug build, then again on a signed
+  release build (same commit, `assembleRelease` + `zipalign` +
+  `apksigner` with the debug keystore, installed locally for this
+  comparison only) with an identical swipe sequence.
+- What worked: **the debug vs. release gap was the whole story.** Debug:
+  90th pct 121ms / 95th pct 133ms / 99th pct 150ms frame time, 14.84% janky
+  frames (legacy), 12 missed vsyncs, "Slow UI thread" flagged on 8 frames.
+  Release (same code, same gestures): 90th pct 5ms / 95th pct 6ms / 99th pct
+  28ms, 1.15% janky frames, 0 missed vsyncs, "Slow UI thread" flagged on 1
+  frame. GPU-side percentiles were near-identical in both builds (2-8ms)
+  and "Slow bitmap uploads" was 0 in both — ruling out rendering/GPU work
+  and Coil image decode as the bottleneck; the cost is squarely
+  CPU/UI-thread work that a debug build's lack of R8 shrinking/optimization
+  and Compose's extra debug-only instrumentation makes ~10x more expensive
+  per frame than the exact same composition work in release. If you're
+  feeling jank while running via Android Studio's "Run" (installs debug by
+  default), that's very likely this, not an app-code bug.
+- Also fixed two smaller, real (if secondary) issues while investigating:
+  `Grid`'s `LazyVerticalGrid` was sizing its height off the payload's
+  `rows` prop rather than actual child count, so a future payload with more
+  children than `rows * columns` declares would silently turn it into its
+  own independently-scrollable region nested inside the outer page
+  `LazyColumn` — a same-direction nested-scroll conflict. Now sized from
+  `ceil(children / columns)` with `userScrollEnabled = false`, so it can't
+  happen regardless of what the JSON declares (`Primitives.kt`,
+  `gridComponent`). Also added missing `key = { it.id }` to
+  `bannerCarouselComponent`'s `LazyRow` (`Composite.kt`) and the static
+  twin's car rail (`StaticLandingScreen.kt`) — neither was the cause of the
+  measured jank (verified: same debug-build numbers as above already
+  included these fixes), but both are correctness/perf best practice for
+  lazy lists.
+- What didn't, and why: the collapsing-header mechanism
+  (`SduiRenderer.kt`/`Collapsible.kt`/`CollapseFraction.kt`) was already
+  suspected and reviewed first, since it's the most scroll-coupled code in
+  the renderer — but it already confines every `.value` read of the
+  scroll-driven `State<Float>` to layout/draw-phase blocks
+  (`Modifier.layout{}`/`graphicsLayer{}`), so it does not recompose per
+  scroll pixel. Not the cause here.
 
 Known likely overhead sources worth checking first, based on the
-architecture (not measured yet):
+architecture (not fully measured yet — the above isolated debug/release
+build overhead as the dominant effect, but didn't rule these out as
+smaller contributors):
 1. `JsonElement`-based generic props mean every component does small
    `jsonPrimitive`/`contentOrNull` coercions on every recomposition — cheap
    individually, worth checking if `derivedStateOf` or `remember`-ing parsed
@@ -104,7 +145,9 @@ architecture (not measured yet):
 3. `AsyncImage` (Coil) network fetches are excluded from the TTR figure by
    design (placeholders show first, images populate async) — confirm the
    logcat trace agrees, and call this out explicitly since it affects how
-   "fully rendered" should be interpreted.
+   "fully rendered" should be interpreted. (Scroll-perf run above found 0
+   "Slow bitmap uploads" in both builds, so Coil decode/upload is not a
+   scroll-jank contributor at least on this device/payload.)
 
 ## Trade-offs
 

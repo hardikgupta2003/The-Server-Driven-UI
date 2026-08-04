@@ -13,7 +13,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -57,33 +56,42 @@ fun SduiPage(
     // Natural (fully expanded) header height, measured once on first
     // layout — collapsing only ever shrinks reported height from there,
     // never the other way, so this capture happens while fraction is
-    // still 0f.
-    var maxHeaderHeightPx by remember { mutableFloatStateOf(0f) }
-    var headerOffsetPx by remember { mutableFloatStateOf(0f) }
+    // still 0f. Plain (non-`by`) state references throughout this
+    // function deliberately: SduiPage's own body never reads `.value` on
+    // any of these, so scrolling never recomposes SduiPage itself either
+    // — only the nestedScrollConnection callback (layout-phase, not
+    // composition) writes them, and only the derivedStateOf below reads
+    // them, whose *own* consumers only recompose if its calculated
+    // output actually changes class (it never does here, by design —
+    // see LocalSduiCollapseFraction's kdoc).
+    val maxHeaderHeightPx = remember { mutableFloatStateOf(0f) }
+    val headerOffsetPx = remember { mutableFloatStateOf(0f) }
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (maxHeaderHeightPx <= 0f) return Offset.Zero
-                val newOffset = (headerOffsetPx + available.y).coerceIn(-maxHeaderHeightPx, 0f)
-                val consumed = newOffset - headerOffsetPx
-                headerOffsetPx = newOffset
-                return Offset(0f, consumed)
+                val maxHeight = maxHeaderHeightPx.value
+                if (maxHeight <= 0f) return Offset.Zero
+                val current = headerOffsetPx.value
+                val newOffset = (current + available.y).coerceIn(-maxHeight, 0f)
+                headerOffsetPx.value = newOffset
+                return Offset(0f, newOffset - current)
             }
         }
     }
 
-    val collapseFraction by remember {
+    val collapseFractionState = remember {
         derivedStateOf {
-            if (maxHeaderHeightPx > 0f) (-headerOffsetPx / maxHeaderHeightPx).coerceIn(0f, 1f) else 0f
+            val maxHeight = maxHeaderHeightPx.value
+            if (maxHeight > 0f) (-headerOffsetPx.value / maxHeight).coerceIn(0f, 1f) else 0f
         }
     }
 
-    CompositionLocalProvider(LocalSduiCollapseFraction provides collapseFraction) {
+    CompositionLocalProvider(LocalSduiCollapseFraction provides collapseFractionState) {
         Column(modifier = modifier) {
             Box(
                 modifier = Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
-                    if (maxHeaderHeightPx == 0f) maxHeaderHeightPx = coordinates.size.height.toFloat()
+                    if (maxHeaderHeightPx.value == 0f) maxHeaderHeightPx.value = coordinates.size.height.toFloat()
                 },
             ) {
                 RenderNode(node = header, registry = registry, currentState = currentState, actionDispatcher = actionDispatcher)
@@ -113,18 +121,29 @@ fun RenderNode(
     val resolved = resolveColorBinding(resolveDataBinding(node, currentState), currentState)
     val component = registry.resolve(resolved.type) ?: unknownComponent
 
-    val context = RenderContext(
-        currentState = currentState,
-        dispatch = { action, eventPayload -> actionDispatcher.dispatch(action, eventPayload) },
-        renderChild = { child ->
-            RenderNode(
-                node = child,
-                registry = registry,
-                currentState = currentState,
-                actionDispatcher = actionDispatcher,
-            )
-        },
-    )
+    // Memoized: registry/actionDispatcher are stable references from
+    // MainActivity for the app's whole lifetime, and currentState keeps
+    // the same Map instance except on a real state write (never during
+    // pure scrolling). So during a scroll gesture this returns the exact
+    // same RenderContext — same object, same dispatch/renderChild lambda
+    // instances — letting every already-composed component below skip
+    // recomposition instead of being handed "new" (by reference) lambdas
+    // every frame. See RenderContext's kdoc for why that distinction is
+    // what actually matters here.
+    val context = remember(registry, currentState, actionDispatcher) {
+        RenderContext(
+            currentState = currentState,
+            dispatch = { action, eventPayload -> actionDispatcher.dispatch(action, eventPayload) },
+            renderChild = { child ->
+                RenderNode(
+                    node = child,
+                    registry = registry,
+                    currentState = currentState,
+                    actionDispatcher = actionDispatcher,
+                )
+            },
+        )
+    }
 
     component(resolved, context)
 }

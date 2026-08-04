@@ -37,6 +37,7 @@ import com.hardik.the_server_driven_ui.sdui.renderer.LocalSduiCollapseFraction
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
 import com.hardik.the_server_driven_ui.sdui.renderer.toModifier
+import kotlin.math.ceil
 import kotlin.math.max
 
 /**
@@ -48,7 +49,11 @@ import kotlin.math.max
 @Composable
 private fun collapseAwareWrapper(node: SduiNode, content: @Composable () -> Unit) {
     if (node.props.str("collapseBehavior") == "hide") {
-        CollapsibleOnHide(fraction = LocalSduiCollapseFraction.current, content = content)
+        // .current here reads the stable State *object* (see
+        // LocalSduiCollapseFraction's kdoc) — this composable does not
+        // recompose as the user scrolls, only CollapsibleOnHide's
+        // internal layout/draw-phase reads react per frame.
+        CollapsibleOnHide(fractionState = LocalSduiCollapseFraction.current, content = content)
     } else {
         content()
     }
@@ -58,11 +63,18 @@ private fun collapseAwareWrapper(node: SduiNode, content: @Composable () -> Unit
  * Generic vertical container. `style.justifyContent`/`alignItems` control
  * main-/cross-axis layout — the same flex-style vocabulary `Row` reads, so
  * neither container needs its own one-off layout props.
+ *
+ * Defaults to full width (matching `Row`'s existing default) rather than
+ * wrap-content: a Column whose only children are narrower-than-screen
+ * leaves (e.g. a footer with just centered/left text, no full-width image
+ * or rail underneath) would otherwise collapse to wrap just those
+ * children's intrinsic width instead of spanning the page — `style.width`
+ * still overrides this explicitly when a node actually wants wrap-content.
  */
 val columnComponent: SduiComponent = { node, context ->
     collapseAwareWrapper(node) {
         Column(
-            modifier = node.style.toModifier(),
+            modifier = node.style.toModifier(Modifier.fillMaxWidth()),
             verticalArrangement = verticalArrangementOf(node.style?.justifyContent),
             horizontalAlignment = horizontalAlignmentOf(node.style?.alignItems),
         ) {
@@ -143,10 +155,19 @@ val carouselRailComponent: SduiComponent = { node, context ->
     }
 }
 
-/** Fixed-column vertical grid, e.g. category tiles or a car-card grid. */
+/**
+ * Fixed-column vertical grid, e.g. category tiles or a car-card grid.
+ * Height is sized from the actual child count, not the payload's `rows`
+ * hint — trusting `rows` there would undersize the box whenever a future
+ * payload adds more children than `rows * columns` declares, turning this
+ * grid into its own independently-scrollable region nested inside the
+ * page's outer vertical list (a same-direction nested-scroll conflict).
+ * `userScrollEnabled = false` closes that off entirely: the grid never
+ * scrolls itself, only the outer list does.
+ */
 val gridComponent: SduiComponent = { node, context ->
-    val columns = node.props.intOr("columns", 2)
-    val rows = node.props.intOr("rows", 2)
+    val columns = node.props.intOr("columns", 2).coerceAtLeast(1)
+    val rowCount = ceil(node.children.size / columns.toFloat()).toInt().coerceAtLeast(1)
     Column(modifier = node.style.toModifier()) {
         node.props.str("title")?.let { title -> SectionTitle(title) }
         LazyVerticalGrid(
@@ -154,7 +175,8 @@ val gridComponent: SduiComponent = { node, context ->
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(16.dp),
-            modifier = Modifier.height((rows * 220).dp),
+            userScrollEnabled = false,
+            modifier = Modifier.height((rowCount * 220).dp),
         ) {
             gridItems(node.children, key = { it.id }) { child ->
                 context.renderChild(child)

@@ -25,13 +25,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -42,6 +42,7 @@ import com.hardik.the_server_driven_ui.sdui.model.intOr
 import com.hardik.the_server_driven_ui.sdui.model.objList
 import com.hardik.the_server_driven_ui.sdui.model.str
 import com.hardik.the_server_driven_ui.sdui.model.strOrEmpty
+import com.hardik.the_server_driven_ui.sdui.renderer.CollapsibleOnHide
 import com.hardik.the_server_driven_ui.sdui.renderer.LocalSduiCollapseFraction
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
@@ -72,7 +73,7 @@ private fun scrollToItem(scope: kotlinx.coroutines.CoroutineScope, listState: La
         if (visible != null) {
             val viewportStart = listState.layoutInfo.viewportStartOffset
             val delta = (visible.offset - viewportStart).toFloat()
-            listState.animateScrollBy(delta, animationSpec = tween(durationMillis = 350))
+            listState.animateScrollBy(delta, animationSpec = tween(durationMillis = 800))
         } else {
             // Target isn't laid out yet (far off-screen) — no pixel offset
             // to compute a delta from, so fall back to the built-in jump,
@@ -133,20 +134,17 @@ val chipRowComponent: SduiComponent = { node, context ->
         val indicatorUnselectedColor = node.props.str("indicatorUnselectedColor")?.let { parseHexColor(it) } ?: Color.Transparent
 
         // Icon-only collapse on a collapsing header (real app: tab icons
-        // fade + slide away, labels + indicator stay put). `collapseFraction`
-        // is 0f whenever this ChipRow isn't nested inside a page-level
-        // collapsing header, so this is a no-op cost in the common case.
-        // `collapseIconOnScroll` lets a specific payload opt out. The icon
-        // itself never changes size (no per-frame remeasure of the icon's
-        // own content) — only the outer box's reported height shrinks
-        // (reclaiming layout space) while the icon fades + translates
-        // upward via a draw-only graphicsLayer transform, exactly the
-        // "fade and slide up" look asked for rather than a shrinking icon.
+        // fade + slide away, labels + indicator stay put). `fractionState`
+        // is a stable, never-changing State(0f) whenever this ChipRow
+        // isn't nested inside a page-level collapsing header (or when
+        // `collapseIconOnScroll` opts a specific payload out) — reading
+        // `.current`/this fallback does not recompose on scroll; only
+        // CollapsibleOnHide's internal layout/draw-phase reads do. See
+        // LocalSduiCollapseFraction's kdoc for why this matters.
         val collapseIconOnScroll = node.props.boolOr("collapseIconOnScroll", true)
-        val collapseFraction = if (collapseIconOnScroll) LocalSduiCollapseFraction.current else 0f
+        val inertFractionState = remember { mutableFloatStateOf(0f) }
+        val iconFractionState = if (collapseIconOnScroll) LocalSduiCollapseFraction.current else inertFractionState
         val naturalIconBoxDp = iconSizeDp + iconBoxPaddingDp * 2
-        val liveIconBoxHeightDp = (naturalIconBoxDp * (1f - collapseFraction)).coerceAtLeast(0f)
-        val liveIconSpacingDp = (itemInnerSpacingDp * (1f - collapseFraction)).toInt()
 
         LazyRow(
             state = listState,
@@ -175,20 +173,15 @@ val chipRowComponent: SduiComponent = { node, context ->
                         }
                         .padding(top = itemTopPaddingDp.dp),
                 ) {
-                    if (liveIconBoxHeightDp > 0f) {
-                        Box(
-                            modifier = Modifier
-                                .width(naturalIconBoxDp.dp)
-                                .height(liveIconBoxHeightDp.dp)
-                                .clipToBounds(),
-                        ) {
+                    CollapsibleOnHide(
+                        fractionState = iconFractionState,
+                        fade = true,
+                        modifier = Modifier.width(naturalIconBoxDp.dp),
+                    ) {
+                        Column {
                             Box(
                                 modifier = Modifier
                                     .size(naturalIconBoxDp.dp)
-                                    .graphicsLayer {
-                                        alpha = (1f - collapseFraction).coerceIn(0f, 1f)
-                                        translationY = -collapseFraction * size.height
-                                    }
                                     .clip(RoundedCornerShape(iconBoxCornerRadiusDp.dp))
                                     .background(iconBoxBackground)
                                     .border(1.dp, iconBoxBorder, RoundedCornerShape(iconBoxCornerRadiusDp.dp)),
@@ -196,8 +189,8 @@ val chipRowComponent: SduiComponent = { node, context ->
                             ) {
                                 SduiIcon(name = icon, sizeDp = iconSizeDp - iconBoxPaddingDp / 2)
                             }
+                            Spacer(modifier = Modifier.height(itemInnerSpacingDp.dp))
                         }
-                        Spacer(modifier = Modifier.height(liveIconSpacingDp.dp))
                     }
                     Text(
                         label,

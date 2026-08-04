@@ -1,11 +1,13 @@
 package com.hardik.the_server_driven_ui.sdui.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 /**
  * Top-level envelope. See SCHEMA.md for the full rationale.
  */
+@Immutable
 @Serializable
 data class PageSchema(
     val schemaVersion: Int,
@@ -13,6 +15,7 @@ data class PageSchema(
     val page: PageContent
 )
 
+@Immutable
 @Serializable
 data class PageContent(
     val id: String,
@@ -35,7 +38,17 @@ data class PageContent(
  * The one recursive unit every visible thing on the page is made of.
  * `props` is intentionally a generic map so an unrecognized key never fails
  * parsing — only an unrecognized `type` falls back (see UnknownComponent).
+ *
+ * `@Immutable`: every node here is parsed once from JSON and never
+ * mutated afterward — changes always go through `.copy()` (see
+ * `resolveDataBinding`/`resolveColorBinding` in `SduiRenderer.kt`), never
+ * in-place mutation of `props`/`children`/`actions`. Without this
+ * annotation the Compose compiler treats `Map`/`List`-bearing classes as
+ * unstable by default (it can't prove immutability from the interface
+ * alone), which disables recomposition skipping for every component
+ * function — they all take an `SduiNode` as their first parameter.
  */
+@Immutable
 @Serializable
 data class SduiNode(
     val id: String,
@@ -55,6 +68,7 @@ data class SduiNode(
  * chip selection swapping which CarCards a CarouselRail shows. The server
  * ships every variant; the client never runs a filter query.
  */
+@Immutable
 @Serializable
 data class DataBinding(
     val stateKey: String,
@@ -68,12 +82,14 @@ data class DataBinding(
  * things like a header row recoloring to match the selected nav tab's
  * theme, without a general "bind any style field" mechanism.
  */
+@Immutable
 @Serializable
 data class ColorBinding(
     val stateKey: String,
     val variants: Map<String, String> = emptyMap()
 )
 
+@Immutable
 @Serializable
 data class SduiAction(
     val type: String,
@@ -93,6 +109,7 @@ data class SduiAction(
  * single component (e.g. `Row`'s old `arrangement` prop, still read as a
  * fallback for older payloads — see `Primitives.kt`).
  */
+@Immutable
 @Serializable
 data class SduiStyle(
     val padding: List<Int>? = null,

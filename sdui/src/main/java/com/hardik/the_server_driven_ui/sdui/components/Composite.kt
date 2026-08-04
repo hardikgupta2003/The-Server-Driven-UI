@@ -87,7 +87,7 @@ val bannerCarouselComponent: SduiComponent = { node, context ->
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         modifier = node.style.toModifier(),
     ) {
-        items(banners) { banner ->
+        items(banners, key = { it.str("id").ifBlank { it.toString() } }) { banner ->
             val imageUrl = banner.str("imageUrl").ifBlank { null }
             val bg = banner.str("background").ifBlank { null }?.let { parseHexColor(it) }
             val route = banner.str("route").ifBlank { null }

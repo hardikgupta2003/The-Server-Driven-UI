@@ -6,7 +6,7 @@
 |---|---|---|---|
 | `Column` | Layout primitive | — (uses `children`) | Generic vertical stack |
 | `Row` | Layout primitive | — (uses `children`) | Generic horizontal stack |
-| `Grid` | Layout primitive | `columns` (Int), `rows` (Int), `title` | Fixed-column `LazyVerticalGrid`; `rows` sizes the viewport height since it's nested inside a scrolling `LazyColumn` |
+| `Grid` | Layout primitive | `columns` (Int), `title` | Fixed-column `LazyVerticalGrid`, nested inside a scrolling `LazyColumn`; height and `userScrollEnabled = false` are derived from the actual child count (not a `rows` prop) so it can never become its own independently-scrollable region |
 | `CarouselRail` | Layout primitive | `title` | Horizontally scrolling `LazyRow`; identical mechanism whether children are `CarCard`s or banners |
 | `Text` | Leaf | `text`, `size`, `weight` (`bold`/`medium`/normal), `color` (hex) | |
 | `Image` | Leaf | `url`, `width`, `height`, `alt` | Missing/failed `url` renders a stable gray placeholder, never a layout hole |
