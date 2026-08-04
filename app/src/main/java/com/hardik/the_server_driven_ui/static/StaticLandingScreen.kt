@@ -1,5 +1,6 @@
 package com.hardik.the_server_driven_ui.static
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,9 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.hardik.the_server_driven_ui.perf.PerfTrace
 
 /**
  * Hand-written, hardcoded twin of the SDUI landing page — same visual
@@ -102,11 +106,21 @@ private val emiByTenure = mapOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StaticLandingScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     var selectedCategory by remember { mutableStateOf("suv") }
     var selectedTenure by remember { mutableStateOf("36") }
     var showEmiSheet by remember { mutableStateOf(false) }
+    var firstFrameReported by remember { mutableStateOf(false) }
 
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier.onGloballyPositioned {
+            if (!firstFrameReported) {
+                firstFrameReported = true
+                PerfTrace.mark("static_first_frame_positioned")
+                (context as? Activity)?.reportFullyDrawn()
+            }
+        },
+    ) {
         item { StaticSearchHeader() }
         item { StaticBannerCarousel() }
         item {

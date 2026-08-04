@@ -1,5 +1,6 @@
 package com.hardik.the_server_driven_ui
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -14,10 +15,14 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hardik.the_server_driven_ui.perf.PerfTrace
 import com.hardik.the_server_driven_ui.sdui.action.ActionDispatcher
 import com.hardik.the_server_driven_ui.sdui.action.buildNodeIndex
 import com.hardik.the_server_driven_ui.sdui.loader.JsonPageLoader
@@ -65,12 +70,25 @@ fun SduiHomeScreen(modifier: Modifier = Modifier) {
         )
     }
 
+    // PERF.md instrumentation: fires once, on the first layout pass that
+    // includes real content (not the empty Scaffold frame). Triggers
+    // Android's own "Fully drawn" cold-start logcat line, which is the
+    // credible, reproducible stand-in for TTR without a separate
+    // Macrobenchmark module.
+    var firstFrameReported by remember { mutableStateOf(false) }
+
     SduiPage(
         page = pageSchema.page,
         registry = registry,
         stateStore = stateStore,
         actionDispatcher = actionDispatcher,
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned {
+            if (!firstFrameReported) {
+                firstFrameReported = true
+                PerfTrace.mark("sdui_first_frame_positioned")
+                (context as? Activity)?.reportFullyDrawn()
+            }
+        },
     )
 
     val sheetNode by stateStore.sheetContent.collectAsState()
