@@ -17,6 +17,17 @@ data class PageSchema(
 data class PageContent(
     val id: String,
     val title: String? = null,
+    /**
+     * Optional collapsing-header region, rendered above the scrollable
+     * [sections] rather than as part of them. When present, scrolling
+     * [sections] drives a shared collapse fraction (0f expanded, 1f
+     * collapsed) that any descendant component may read — e.g. a node
+     * with `props.collapseBehavior = "hide"` shrinks away entirely, while
+     * `ChipRow`'s icon-tab variant shrinks just its icons and keeps
+     * labels. Omit this field entirely for a plain non-collapsing page —
+     * existing payloads with no `header` key behave exactly as before.
+     */
+    val header: SduiNode? = null,
     val sections: List<SduiNode> = emptyList()
 )
 
@@ -34,6 +45,8 @@ data class SduiNode(
     val props: Map<String, JsonElement> = emptyMap(),
     val children: List<SduiNode> = emptyList(),
     val dataBinding: DataBinding? = null,
+    /** Same variant-map idea as [dataBinding], but swaps `style.background` instead of `children` — e.g. the header recoloring per selected nav tab. */
+    val colorBinding: ColorBinding? = null,
     val actions: Map<String, SduiAction> = emptyMap()
 )
 
@@ -46,6 +59,19 @@ data class SduiNode(
 data class DataBinding(
     val stateKey: String,
     val variants: Map<String, List<SduiNode>> = emptyMap()
+)
+
+/**
+ * Precomputed hex-color variants keyed by a state value — the same
+ * "server ships every option, client just picks one" principle as
+ * [DataBinding], applied to a style property instead of content. Used for
+ * things like a header row recoloring to match the selected nav tab's
+ * theme, without a general "bind any style field" mechanism.
+ */
+@Serializable
+data class ColorBinding(
+    val stateKey: String,
+    val variants: Map<String, String> = emptyMap()
 )
 
 @Serializable

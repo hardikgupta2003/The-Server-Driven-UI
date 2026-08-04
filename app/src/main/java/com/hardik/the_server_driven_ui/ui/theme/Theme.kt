@@ -2,7 +2,6 @@ package com.hardik.the_server_driven_ui.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -35,9 +34,15 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun TheServerDrivenUITheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // The Cars24 landing page this app replicates is always a
+    // light-background page regardless of the device's system theme —
+    // following isSystemInDarkTheme()/dynamicColor here would put light
+    // pastel card colors from the JSON on a near-black Surface, which
+    // doesn't match the real app and isn't something the JSON schema
+    // controls (colorBinding drives specific node backgrounds, not the
+    // whole app's theme).
+    darkTheme: Boolean = false,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

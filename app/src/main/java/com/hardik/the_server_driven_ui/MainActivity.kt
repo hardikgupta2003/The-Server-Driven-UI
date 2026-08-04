@@ -65,13 +65,20 @@ fun SduiHomeScreen(modifier: Modifier = Modifier) {
     // Catch bad JSON before it reaches the renderer: duplicate ids (would
     // crash a lazy list's key()), an openSheet pointing at a target that
     // doesn't exist, a ChipRow with no onSelect.target, etc. Sanitized
-    // sections are what actually gets rendered below.
+    // sections/header are what actually gets rendered below. Validated
+    // separately from `sections` since `header` (if present) is a
+    // distinct page-level slot, not one of the scrollable sections.
     val validatedSections = remember(pageSchema, registry) {
         SduiValidator.validateAndLog(pageSchema.page.sections, registry)
     }
-    val page = remember(pageSchema, validatedSections) { pageSchema.page.copy(sections = validatedSections) }
+    val validatedHeader = remember(pageSchema, registry) {
+        pageSchema.page.header?.let { header -> SduiValidator.validateAndLog(listOf(header), registry).firstOrNull() }
+    }
+    val page = remember(pageSchema, validatedSections, validatedHeader) {
+        pageSchema.page.copy(header = validatedHeader, sections = validatedSections)
+    }
 
-    val nodeIndex = remember(page) { buildNodeIndex(page.sections) }
+    val nodeIndex = remember(page) { buildNodeIndex(listOfNotNull(page.header) + page.sections) }
     val actionDispatcher = remember(nodeIndex) {
         ActionDispatcher(
             stateStore = stateStore,

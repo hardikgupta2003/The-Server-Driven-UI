@@ -28,13 +28,31 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.hardik.the_server_driven_ui.sdui.model.SduiNode
 import com.hardik.the_server_driven_ui.sdui.model.intOr
 import com.hardik.the_server_driven_ui.sdui.model.str
 import com.hardik.the_server_driven_ui.sdui.model.strOrEmpty
+import com.hardik.the_server_driven_ui.sdui.renderer.CollapsibleOnHide
+import com.hardik.the_server_driven_ui.sdui.renderer.LocalSduiCollapseFraction
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
 import com.hardik.the_server_driven_ui.sdui.renderer.toModifier
 import kotlin.math.max
+
+/**
+ * `props.collapseBehavior = "hide"` opts any node into shrinking away as
+ * a page's collapsing header collapses (see [CollapsibleOnHide]) — read
+ * generically here rather than in the renderer, so any component could
+ * adopt the same prop, not just Row/Column.
+ */
+@Composable
+private fun collapseAwareWrapper(node: SduiNode, content: @Composable () -> Unit) {
+    if (node.props.str("collapseBehavior") == "hide") {
+        CollapsibleOnHide(fraction = LocalSduiCollapseFraction.current, content = content)
+    } else {
+        content()
+    }
+}
 
 /**
  * Generic vertical container. `style.justifyContent`/`alignItems` control
@@ -42,12 +60,14 @@ import kotlin.math.max
  * neither container needs its own one-off layout props.
  */
 val columnComponent: SduiComponent = { node, context ->
-    Column(
-        modifier = node.style.toModifier(),
-        verticalArrangement = verticalArrangementOf(node.style?.justifyContent),
-        horizontalAlignment = horizontalAlignmentOf(node.style?.alignItems),
-    ) {
-        node.children.forEach { child -> context.renderChild(child) }
+    collapseAwareWrapper(node) {
+        Column(
+            modifier = node.style.toModifier(),
+            verticalArrangement = verticalArrangementOf(node.style?.justifyContent),
+            horizontalAlignment = horizontalAlignmentOf(node.style?.alignItems),
+        ) {
+            node.children.forEach { child -> context.renderChild(child) }
+        }
     }
 }
 
@@ -93,16 +113,18 @@ private fun horizontalAlignmentOf(name: String?): Alignment.Horizontal = when (n
  * upgrade" forward-compatibility story `SCHEMA.md` describes for `props`.
  */
 val rowComponent: SduiComponent = { node, context ->
-    val justify = node.style?.justifyContent ?: node.props.str("arrangement")
-    val align = node.style?.alignItems ?: node.props.str("verticalAlignment", "center")?.let {
-        if (it == "top") "start" else "center"
-    }
-    Row(
-        modifier = node.style.toModifier(Modifier.fillMaxWidth()),
-        horizontalArrangement = horizontalArrangementOf(justify),
-        verticalAlignment = verticalAlignmentOf(align),
-    ) {
-        node.children.forEach { child -> context.renderChild(child) }
+    collapseAwareWrapper(node) {
+        val justify = node.style?.justifyContent ?: node.props.str("arrangement")
+        val align = node.style?.alignItems ?: node.props.str("verticalAlignment", "center")?.let {
+            if (it == "top") "start" else "center"
+        }
+        Row(
+            modifier = node.style.toModifier(Modifier.fillMaxWidth()),
+            horizontalArrangement = horizontalArrangementOf(justify),
+            verticalAlignment = verticalAlignmentOf(align),
+        ) {
+            node.children.forEach { child -> context.renderChild(child) }
+        }
     }
 }
 
@@ -144,7 +166,11 @@ val gridComponent: SduiComponent = { node, context ->
 val textComponent: SduiComponent = { node, _ ->
     val text = node.props.strOrEmpty("text")
     val sizeSp = node.props.intOr("size", 14)
-    val maxLines = node.props.intOr("maxLines", 1)
+    // Unlimited unless a node opts into truncation. `1` was the old
+    // default and silently clipped every "\n"-joined two-line label in
+    // the JSON to just its first line, since Compose's Text(maxLines=1)
+    // hard-clips regardless of embedded newlines.
+    val maxLines = node.props.intOr("maxLines", Int.MAX_VALUE)
     val weight = node.props.str("weight")
     val colorHex = node.props.str("color")
     Text(

@@ -165,7 +165,7 @@ val valuePropStripComponent: SduiComponent = { node, _ ->
     ) {
         items.forEach { item ->
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 4.dp)) {
-                Text(item.str("icon", "★"), style = MaterialTheme.typography.titleLarge)
+                SduiIcon(name = item.str("icon", "★"), sizeDp = 22)
                 Text(item.str("label"), style = MaterialTheme.typography.labelSmall, maxLines = 2)
             }
         }
