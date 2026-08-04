@@ -1,0 +1,27 @@
+package com.hardik.the_server_driven_ui.sdui.loader
+
+import android.content.Context
+import com.hardik.the_server_driven_ui.sdui.model.PageSchema
+import kotlinx.serialization.json.Json
+
+/**
+ * Mock "server": reads the page payload straight out of assets. Swapping
+ * this for a real network call later is a one-function change — nothing
+ * downstream (renderer, registry, state) knows or cares where the JSON
+ * came from.
+ */
+object JsonPageLoader {
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
+
+    fun loadFromAssets(context: Context, fileName: String): PageSchema {
+        val raw = context.assets.open(fileName).bufferedReader().use { it.readText() }
+        return json.decodeFromString(PageSchema.serializer(), raw)
+    }
+
+    fun loadFromString(raw: String): PageSchema =
+        json.decodeFromString(PageSchema.serializer(), raw)
+}
