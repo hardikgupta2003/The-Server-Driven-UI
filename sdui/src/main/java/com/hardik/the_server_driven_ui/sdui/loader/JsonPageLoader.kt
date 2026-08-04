@@ -1,7 +1,7 @@
 package com.hardik.the_server_driven_ui.sdui.loader
 
 import android.content.Context
-import com.hardik.the_server_driven_ui.perf.PerfTrace
+import com.hardik.the_server_driven_ui.sdui.perf.PerfTrace
 import com.hardik.the_server_driven_ui.sdui.model.PageSchema
 import kotlinx.serialization.json.Json
 

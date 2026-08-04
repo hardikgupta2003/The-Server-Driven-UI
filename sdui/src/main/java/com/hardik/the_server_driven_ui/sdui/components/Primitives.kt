@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,6 +20,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -32,17 +34,74 @@ import com.hardik.the_server_driven_ui.sdui.model.strOrEmpty
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
 import com.hardik.the_server_driven_ui.sdui.renderer.toModifier
+import kotlin.math.max
 
-/** Generic vertical container. Lays out opaque children — knows nothing about what they are. */
+/**
+ * Generic vertical container. `style.justifyContent`/`alignItems` control
+ * main-/cross-axis layout — the same flex-style vocabulary `Row` reads, so
+ * neither container needs its own one-off layout props.
+ */
 val columnComponent: SduiComponent = { node, context ->
-    Column(modifier = node.style.toModifier()) {
+    Column(
+        modifier = node.style.toModifier(),
+        verticalArrangement = verticalArrangementOf(node.style?.justifyContent),
+        horizontalAlignment = horizontalAlignmentOf(node.style?.alignItems),
+    ) {
         node.children.forEach { child -> context.renderChild(child) }
     }
 }
 
-/** Generic horizontal container. */
+private fun horizontalArrangementOf(name: String?): Arrangement.Horizontal = when (name) {
+    "spaceBetween" -> Arrangement.SpaceBetween
+    "spaceEvenly" -> Arrangement.SpaceEvenly
+    "spaceAround" -> Arrangement.SpaceAround
+    "center" -> Arrangement.Center
+    "end" -> Arrangement.End
+    "start" -> Arrangement.Start
+    else -> Arrangement.Start
+}
+
+private fun verticalArrangementOf(name: String?): Arrangement.Vertical = when (name) {
+    "spaceBetween" -> Arrangement.SpaceBetween
+    "spaceEvenly" -> Arrangement.SpaceEvenly
+    "spaceAround" -> Arrangement.SpaceAround
+    "center" -> Arrangement.Center
+    "end" -> Arrangement.Bottom
+    "start" -> Arrangement.Top
+    else -> Arrangement.Top
+}
+
+private fun verticalAlignmentOf(name: String?): Alignment.Vertical = when (name) {
+    "center" -> Alignment.CenterVertically
+    "end" -> Alignment.Bottom
+    "start" -> Alignment.Top
+    else -> Alignment.CenterVertically
+}
+
+private fun horizontalAlignmentOf(name: String?): Alignment.Horizontal = when (name) {
+    "center" -> Alignment.CenterHorizontally
+    "end" -> Alignment.End
+    "start" -> Alignment.Start
+    else -> Alignment.Start
+}
+
+/**
+ * Generic horizontal container. Prefers `style.justifyContent`/`alignItems`
+ * (shared with `Column`); falls back to the older `props.arrangement`/
+ * `verticalAlignment` so a payload written before this generalization still
+ * renders unchanged — the same "old prop, new behavior lights up on
+ * upgrade" forward-compatibility story `SCHEMA.md` describes for `props`.
+ */
 val rowComponent: SduiComponent = { node, context ->
-    Row(modifier = node.style.toModifier()) {
+    val justify = node.style?.justifyContent ?: node.props.str("arrangement")
+    val align = node.style?.alignItems ?: node.props.str("verticalAlignment", "center")?.let {
+        if (it == "top") "start" else "center"
+    }
+    Row(
+        modifier = node.style.toModifier(Modifier.fillMaxWidth()),
+        horizontalArrangement = horizontalArrangementOf(justify),
+        verticalAlignment = verticalAlignmentOf(align),
+    ) {
         node.children.forEach { child -> context.renderChild(child) }
     }
 }
@@ -85,10 +144,12 @@ val gridComponent: SduiComponent = { node, context ->
 val textComponent: SduiComponent = { node, _ ->
     val text = node.props.strOrEmpty("text")
     val sizeSp = node.props.intOr("size", 14)
+    val maxLines = node.props.intOr("maxLines", 1)
     val weight = node.props.str("weight")
     val colorHex = node.props.str("color")
     Text(
         text = text,
+        maxLines = maxLines,
         modifier = node.style.toModifier(),
         color = colorHex?.let { parseHexColor(it) } ?: Color.Unspecified,
         fontSize = TextUnit(sizeSp.toFloat(), TextUnitType.Sp),
@@ -96,6 +157,12 @@ val textComponent: SduiComponent = { node, _ ->
             "bold" -> FontWeight.Bold
             "medium" -> FontWeight.Medium
             else -> FontWeight.Normal
+        },
+        textAlign = when (node.style?.alignment) {
+            "center" -> androidx.compose.ui.text.style.TextAlign.Center
+            "end" -> androidx.compose.ui.text.style.TextAlign.End
+            "start" -> androidx.compose.ui.text.style.TextAlign.Start
+            else -> null
         },
     )
 }

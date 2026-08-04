@@ -60,6 +60,12 @@ data class SduiAction(
  * Shared, component-agnostic visual props. Every component reads from the
  * same model so styling is never reimplemented per component type.
  * Padding/margin are [start, top, end, bottom] in dp.
+ *
+ * `justifyContent`/`alignItems` are generic main-/cross-axis controls any
+ * layout primitive (`Row`, `Column`, ...) can read — one flex-style vocabulary
+ * shared across container types, instead of one-off props bolted onto a
+ * single component (e.g. `Row`'s old `arrangement` prop, still read as a
+ * fallback for older payloads — see `Primitives.kt`).
  */
 @Serializable
 data class SduiStyle(
@@ -68,7 +74,17 @@ data class SduiStyle(
     val background: String? = null,
     val cornerRadius: Int? = null,
     val elevation: Int? = null,
+    /** Text alignment for leaf text nodes: "start" | "center" | "end". */
     val alignment: String? = null,
+    /** "match" | "wrap" | a plain number treated as dp. */
     val width: String? = null,
-    val height: String? = null
+    val height: String? = null,
+    /** Main-axis distribution: "start" | "end" | "center" | "spaceBetween" | "spaceAround" | "spaceEvenly". */
+    val justifyContent: String? = null,
+    /** Cross-axis alignment: "start" | "center" | "end". */
+    val alignItems: String? = null,
+    val opacity: Float? = null,
+    val borderWidth: Int? = null,
+    val borderColor: String? = null,
+    val rotation: Float? = null,
 )

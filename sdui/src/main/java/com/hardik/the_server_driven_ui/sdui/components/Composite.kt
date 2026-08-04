@@ -128,6 +128,10 @@ val searchHeaderComponent: SduiComponent = { node, context ->
     val placeholder = node.props.strOrEmpty("placeholder", "Search cars, brands...")
     val title = node.props.str("title")
     val onClick = node.actions["onClick"]
+    val backgroundColor = node.props.str("backgroundColor")?.let { parseHexColor(it) } ?: Color(0x33FFFFFF)
+    val borderColor = node.props.str("borderColor")?.let { parseHexColor(it) } ?: Color(0xFFE0E0E0)
+    val hintColor = node.props.str("hintColor")?.let { parseHexColor(it) } ?: Color(0xFFE0E0E0)
+
     Column(modifier = node.style.toModifier(Modifier.fillMaxWidth().padding(16.dp))) {
         title?.let { Text(it, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) }
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
@@ -136,7 +140,15 @@ val searchHeaderComponent: SduiComponent = { node, context ->
             onValueChange = {},
             readOnly = true,
             enabled = false,
-            placeholder = { Text(placeholder) },
+            placeholder = { Text(placeholder, color = hintColor) },
+            shape = RoundedCornerShape(12.dp),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                disabledContainerColor = backgroundColor,
+                disabledBorderColor = borderColor,
+                disabledPlaceholderColor = hintColor,
+                disabledLeadingIconColor = hintColor,
+            ),
+            leadingIcon = { Text("🔍", color = hintColor) },
             modifier = Modifier.fillMaxWidth().let {
                 if (onClick != null) it.clickableAction { context.dispatch(onClick, null) } else it
             },

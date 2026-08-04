@@ -43,7 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.hardik.the_server_driven_ui.perf.PerfTrace
+import com.hardik.the_server_driven_ui.sdui.perf.PerfTrace
 
 /**
  * Hand-written, hardcoded twin of the SDUI landing page — same visual

@@ -9,7 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.hardik.the_server_driven_ui.BuildConfig
+import com.hardik.the_server_driven_ui.sdui.BuildConfig
 import com.hardik.the_server_driven_ui.sdui.model.SduiNode
 
 private const val TAG = "SduiUnknownComponent"

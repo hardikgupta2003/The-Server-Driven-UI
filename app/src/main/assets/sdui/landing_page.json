@@ -6,70 +6,1094 @@
     "title": "Cars24 Home",
     "sections": [
       {
-        "id": "search_header",
-        "type": "SearchHeader",
-        "props": {
-          "title": "Find your next car",
-          "placeholder": "Search by brand, model or budget"
+        "id": "header_location_row",
+        "type": "Row",
+        "style": {
+          "padding": [
+            12,
+            16,
+            12,
+            4
+          ],
+          "background": "#392BCB"
         },
-        "actions": {
-          "onClick": { "type": "navigate", "payload": { "route": "search" } }
-        }
-      },
-      {
-        "id": "banner_carousel_promos",
-        "type": "BannerCarousel",
-        "style": { "margin": [0, 8, 0, 8] },
         "props": {
-          "items": [
-            {
-              "id": "promo_assured",
-              "title": "CARS24 Assured — 140 point inspected",
-              "background": "#2E7D32",
-              "route": "assured_landing"
-            },
-            {
-              "id": "promo_finance",
-              "title": "Car loans from 9.4% interest",
-              "background": "#1565C0",
-              "route": "finance_landing"
-            },
-            {
-              "id": "promo_sell",
-              "title": "Sell your car in 30 minutes",
-              "background": "#EF6C00",
-              "route": "sell_landing"
+          "arrangement": "spaceBetween"
+        },
+        "children": [
+          {
+            "id": "header_location_text",
+            "type": "Text",
+            "props": {
+              "text": "📍 Bangalore",
+              "size": 14,
+              "weight": "medium",
+              "color": "#FFFFFF"
             }
-          ]
-        }
+          },
+          {
+            "id": "header_profile_icon",
+            "type": "Text",
+            "props": {
+              "text": "👤",
+              "size": 16,
+              "color": "#FFFFFF"
+            }
+          }
+        ]
       },
       {
-        "id": "chip_row_category",
-        "type": "ChipRow",
-        "style": { "padding": [0, 4, 0, 4] },
+        "id": "search_header_row",
+        "type": "Row",
+        "style": {
+          "padding": [
+            6,
+            4,
+            6,
+            4
+          ],
+          "background": "#392BCB"
+        },
         "props": {
-          "defaultSelected": "suv",
+          "arrangement": "spaceBetween"
+        },
+        "children": [
+          {
+            "id": "search_header",
+            "type": "SearchHeader",
+            "style": {
+              "background": "#392BCB"
+            },
+            "props": {
+              "placeholder": "Search Buy Used Cars",
+              "backgroundColor": "#4E42D8",
+              "borderColor": "#D8D5F5",
+              "hintColor": "#D8D5F5"
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "search"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "nav_tab_chips",
+        "type": "ChipRow",
+        "style": {
+          "background": "#392BCB"
+        },
+        "props": {
+          "variant": "iconTab",
+          "iconSize": 50,
+          "iconBoxBackgroundColor": "#4E42D8",
+          "iconBoxCornerRadius": 100,
+          "iconBoxPadding": 12,
+          "iconBoxBorderColor": "#D8D5F5",
+          "labelSize": 14,
+          "defaultSelected": "all",
+          "_note": "Real app: this header (search + tabs) is sticky while scrolling; ChipRow still fires one shared action for the whole row so each tab can't route to its own destination yet — both gaps noted, not fixed here.",
           "items": [
-            { "id": "suv", "label": "SUV", "value": "suv" },
-            { "id": "sedan", "label": "Sedan", "value": "sedan" },
-            { "id": "hatchback", "label": "Hatchback", "value": "hatchback" },
-            { "id": "muv", "label": "MUV", "value": "muv" }
+            {
+              "id": "all",
+              "label": "All",
+              "value": "all",
+              "icon": "▦"
+            },
+            {
+              "id": "buy",
+              "label": "Buy used car",
+              "value": "buy",
+              "icon": "🚗"
+            },
+            {
+              "id": "sell",
+              "label": "Sell car",
+              "value": "sell",
+              "icon": "🔑"
+            },
+            {
+              "id": "loans",
+              "label": "Loans",
+              "value": "loans",
+              "icon": "💰"
+            },
+            {
+              "id": "challan",
+              "label": "Challan",
+              "value": "challan",
+              "icon": "🧾"
+            },
+            {
+              "id": "car_check_insurance",
+              "label": "insurance",
+              "value": "car_check_insurance",
+              "icon": "🛡️"
+            }
           ]
         },
         "actions": {
           "onSelect": {
             "type": "updateState",
-            "target": "selectedCategory",
+            "target": "selectedNavTab",
             "payloadFromEvent": "value"
           }
         }
       },
       {
-        "id": "rail_popular_cars",
+        "id": "buy_car_rail",
         "type": "CarouselRail",
-        "props": { "title": "Popular near you" },
+        "style": {
+          "margin": [
+            0,
+            12,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Buy car",
+          "badge": "Up to ₹80,000 off",
+          "_note": "badge is a trailing pill next to the title in the real app — CarouselRail only renders a plain title today, prop is ignored for now."
+        },
+        "children": [
+          {
+            "id": "buy_all_used",
+            "type": "Column",
+            "style": {
+              "background": "#1A3AAF",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "buy_all_used_cars"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "buy_all_used_text",
+                "type": "Text",
+                "props": {
+                  "text": "All used\ncars",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "buy_budget",
+            "type": "Column",
+            "style": {
+              "background": "#1A3AAF",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "buy_budget_used_cars"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "buy_budget_text",
+                "type": "Text",
+                "props": {
+                  "text": "Budget used\ncars",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "buy_premium",
+            "type": "Column",
+            "style": {
+              "background": "#1A3AAF",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "buy_premium_used_cars"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "buy_premium_text",
+                "type": "Text",
+                "props": {
+                  "text": "Premium used\ncars",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "buy_nearly_new",
+            "type": "Column",
+            "style": {
+              "background": "#1A3AAF",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "buy_nearly_new_cars"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "buy_nearly_new_text",
+                "type": "Text",
+                "props": {
+                  "text": "Nearly new\ncars",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sell_car_rail",
+        "type": "CarouselRail",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Sell your car"
+        },
+        "children": [
+          {
+            "id": "sell_your_car",
+            "type": "Column",
+            "style": {
+              "background": "#1B5E20",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "sell_flow"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "sell_your_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Sell your\ncar",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "sell_check_valuation",
+            "type": "Column",
+            "style": {
+              "background": "#1B5E20",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "car_valuation"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "sell_check_valuation_text",
+                "type": "Text",
+                "props": {
+                  "text": "Check car\nvaluation",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "sell_scrap_car",
+            "type": "Column",
+            "style": {
+              "background": "#1B5E20",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "scrap_car"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "sell_scrap_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Scrap your\ncar",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          },
+          {
+            "id": "sell_exchange_car",
+            "type": "Column",
+            "style": {
+              "background": "#1B5E20",
+              "cornerRadius": 12,
+              "padding": [
+                16,
+                20,
+                16,
+                20
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "exchange_car"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "sell_exchange_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Exchange your\ncar",
+                  "size": 16,
+                  "weight": "bold",
+                  "color": "#FFFFFF"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "get_loans_rail",
+        "type": "CarouselRail",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Get loans"
+        },
+        "children": [
+          {
+            "id": "loan_used_car",
+            "type": "Column",
+            "style": {
+              "padding": [
+                8,
+                8,
+                8,
+                8
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "used_car_loan"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "loan_used_car_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/usedcarloan/160/160",
+                  "width": 72,
+                  "height": 72
+                }
+              },
+              {
+                "id": "loan_used_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Used car loan",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "loan_against_car",
+            "type": "Column",
+            "style": {
+              "padding": [
+                8,
+                8,
+                8,
+                8
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "loan_against_car"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "loan_against_car_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/loanagainstcar/160/160",
+                  "width": 72,
+                  "height": 72
+                }
+              },
+              {
+                "id": "loan_against_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Loan against car",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "loan_personal",
+            "type": "Column",
+            "style": {
+              "padding": [
+                8,
+                8,
+                8,
+                8
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "personal_loan"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "loan_personal_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/personalloan/160/160",
+                  "width": 72,
+                  "height": 72
+                }
+              },
+              {
+                "id": "loan_personal_text",
+                "type": "Text",
+                "props": {
+                  "text": "Personal loan",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "loan_credit_score",
+            "type": "Column",
+            "style": {
+              "padding": [
+                8,
+                8,
+                8,
+                8
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "check_credit_score"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "loan_credit_score_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/creditscore/160/160",
+                  "width": 72,
+                  "height": 72
+                }
+              },
+              {
+                "id": "loan_credit_score_text",
+                "type": "Text",
+                "props": {
+                  "text": "Check credit score",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "car_check_services_grid",
+        "type": "Grid",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Car check services",
+          "columns": 3,
+          "rows": 2
+        },
+        "children": [
+          {
+            "id": "check_new_car_pdi",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "new_car_pdi"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_new_car_pdi_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/newcarpdi/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_new_car_pdi_text",
+                "type": "Text",
+                "props": {
+                  "text": "New car PDI",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "check_used_car",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "used_car_check"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_used_car_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/usedcarcheck/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_used_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Used car check",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "check_vehicle_history",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "vehicle_history"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_vehicle_history_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/vehiclehistory/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_vehicle_history_text",
+                "type": "Text",
+                "props": {
+                  "text": "Vehicle history",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "check_challan",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "check_challan"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_challan_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/checkchallan/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_challan_text",
+                "type": "Text",
+                "props": {
+                  "text": "Check challan",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "check_car_insurance",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "check_car_insurance"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_car_insurance_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/carinsurancecheck/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_car_insurance_text",
+                "type": "Text",
+                "props": {
+                  "text": "Check car insurance",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "check_odometer_tampering",
+            "type": "Column",
+            "style": {
+              "background": "#FFF3E0",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "odometer_tampering"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "check_odometer_tampering_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/odometer/160/160",
+                  "width": 56,
+                  "height": 56
+                }
+              },
+              {
+                "id": "check_odometer_tampering_text",
+                "type": "Text",
+                "props": {
+                  "text": "Odometer tampering",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "used_cars_rail",
+        "type": "CarouselRail",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Used cars you'll love",
+          "viewAllLabel": "View all",
+          "_note": "viewAllLabel is a trailing header link in the real app — ignored today, CarouselRail only renders the plain title. CarCard props below (emi/trustBadges/wishlistable/ownedStock) are also ahead of what CarCard currently renders — kept in the payload anyway as a forward-compatibility demo per SCHEMA.md's versioning story: when CarCard is enhanced to read them, this JSON won't need to change."
+        },
+        "children": [
+          {
+            "id": "used_car_swift_2017",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/swift2017/400/300",
+              "title": "2017 Maruti Swift VXI",
+              "subtitle": "71,846 km · Petrol · Manual · KA01",
+              "price": "₹4.65 Lakh",
+              "badge": "Cars24 Owned stock",
+              "emi": "EMI ₹9,091/m* +other charges",
+              "trustBadges": [
+                "Zero Worry Max",
+                "Lifetime warranty"
+              ],
+              "wishlistable": true
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "car_detail",
+                  "carId": "used_car_swift_2017"
+                }
+              }
+            }
+          },
+          {
+            "id": "used_car_kwid_2015",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/kwid2015/400/300",
+              "title": "2015 Renault Kwid RXL",
+              "subtitle": "44,515 km · Petrol · Manual",
+              "price": "₹2.32 Lakh",
+              "badge": "Cars24 Owned stock",
+              "emi": "EMI ₹4,540/m* +other charges",
+              "trustBadges": [
+                "Zero Worry Max",
+                "Lifetime warranty"
+              ],
+              "wishlistable": true
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "car_detail",
+                  "carId": "used_car_kwid_2015"
+                }
+              }
+            }
+          },
+          {
+            "id": "used_car_i10_2019",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/i102019/400/300",
+              "title": "2019 Hyundai Grand i10",
+              "subtitle": "38,210 km · Petrol · Manual",
+              "price": "₹5.10 Lakh",
+              "badge": "Cars24 Owned stock",
+              "emi": "EMI ₹9,980/m* +other charges",
+              "trustBadges": [
+                "Zero Worry Max",
+                "Lifetime warranty"
+              ],
+              "wishlistable": true
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "car_detail",
+                  "carId": "used_car_i10_2019"
+                }
+              }
+            }
+          },
+          {
+            "id": "used_car_wagonr_2018",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/wagonr2018/400/300",
+              "title": "2018 Maruti WagonR VXI",
+              "subtitle": "52,900 km · Petrol · Manual",
+              "price": "₹4.20 Lakh",
+              "badge": "Cars24 Owned stock",
+              "emi": "EMI ₹8,220/m* +other charges",
+              "trustBadges": [
+                "Zero Worry Max",
+                "Lifetime warranty"
+              ],
+              "wishlistable": true
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "car_detail",
+                  "carId": "used_car_wagonr_2018"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "chip_row_body_type_demo",
+        "type": "ChipRow",
+        "style": {
+          "padding": [
+            0,
+            8,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "_note": "Not from the real screenshots — added specifically to satisfy the assignment's required 'SDUI-action-driven interactive element' with a visible content swap, distinct from the rail above.",
+          "defaultSelected": "suv",
+          "items": [
+            {
+              "id": "suv",
+              "label": "SUV",
+              "value": "suv"
+            },
+            {
+              "id": "sedan",
+              "label": "Sedan",
+              "value": "sedan"
+            },
+            {
+              "id": "hatchback",
+              "label": "Hatchback",
+              "value": "hatchback"
+            },
+            {
+              "id": "muv",
+              "label": "MUV",
+              "value": "muv"
+            }
+          ]
+        },
+        "actions": {
+          "onSelect": {
+            "type": "updateState",
+            "target": "selectedBodyType",
+            "payloadFromEvent": "value"
+          }
+        }
+      },
+      {
+        "id": "rail_popular_by_body_type",
+        "type": "CarouselRail",
+        "props": {
+          "title": "Popular by body type"
+        },
         "dataBinding": {
-          "stateKey": "selectedCategory",
+          "stateKey": "selectedBodyType",
           "variants": {
             "suv": [
               {
@@ -82,19 +1106,35 @@
                   "price": "₹13.75 Lakh",
                   "badge": "Assured"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_creta" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_creta"
+                    }
+                  }
+                }
               },
               {
-                "id": "car_seltos",
+                "id": "car_seltos_used",
                 "type": "CarCard",
                 "props": {
-                  "imageUrl": "https://picsum.photos/seed/seltos/400/300",
+                  "imageUrl": "https://picsum.photos/seed/seltosused/400/300",
                   "title": "Kia Seltos HTX 2020",
                   "subtitle": "41,200 km · Diesel · Manual",
                   "price": "₹12.10 Lakh",
                   "badge": "Assured"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_seltos" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_seltos_used"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_nexon",
@@ -105,19 +1145,15 @@
                   "subtitle": "18,900 km · Petrol · Manual",
                   "price": "₹9.85 Lakh"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_nexon" } } }
-              },
-              {
-                "id": "car_xuv700",
-                "type": "CarCard",
-                "props": {
-                  "imageUrl": "https://picsum.photos/seed/xuv700/400/300",
-                  "title": "Mahindra XUV700 AX7 2022",
-                  "subtitle": "22,050 km · Diesel · Automatic",
-                  "price": "₹19.40 Lakh",
-                  "badge": "New arrival"
-                },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_xuv700" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_nexon"
+                    }
+                  }
+                }
               }
             ],
             "sedan": [
@@ -131,7 +1167,15 @@
                   "price": "₹12.90 Lakh",
                   "badge": "Assured"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_city" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_city"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_verna",
@@ -142,7 +1186,15 @@
                   "subtitle": "35,300 km · Petrol · Manual",
                   "price": "₹9.60 Lakh"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_verna" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_verna"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_slavia",
@@ -154,32 +1206,37 @@
                   "price": "₹14.25 Lakh",
                   "badge": "New arrival"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_slavia" } } }
-              },
-              {
-                "id": "car_ciaz",
-                "type": "CarCard",
-                "props": {
-                  "imageUrl": "https://picsum.photos/seed/ciaz/400/300",
-                  "title": "Maruti Suzuki Ciaz Alpha 2019",
-                  "subtitle": "48,700 km · Petrol · Manual",
-                  "price": "₹8.15 Lakh"
-                },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_ciaz" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_slavia"
+                    }
+                  }
+                }
               }
             ],
             "hatchback": [
               {
-                "id": "car_swift",
+                "id": "car_swift_used",
                 "type": "CarCard",
                 "props": {
-                  "imageUrl": "https://picsum.photos/seed/swift/400/300",
+                  "imageUrl": "https://picsum.photos/seed/swiftused/400/300",
                   "title": "Maruti Suzuki Swift VXI 2021",
                   "subtitle": "24,800 km · Petrol · Manual",
                   "price": "₹6.45 Lakh",
                   "badge": "Assured"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_swift" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_swift_used"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_i20",
@@ -191,7 +1248,15 @@
                   "price": "₹7.90 Lakh",
                   "badge": "New arrival"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_i20" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_i20"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_altroz",
@@ -202,19 +1267,15 @@
                   "subtitle": "21,300 km · Diesel · Manual",
                   "price": "₹6.95 Lakh"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_altroz" } } }
-              },
-              {
-                "id": "car_baleno",
-                "type": "CarCard",
-                "props": {
-                  "imageUrl": "https://picsum.photos/seed/baleno/400/300",
-                  "title": "Maruti Suzuki Baleno Delta 2020",
-                  "subtitle": "30,100 km · Petrol · Manual",
-                  "price": "₹6.10 Lakh",
-                  "badge": "Assured"
-                },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_baleno" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_altroz"
+                    }
+                  }
+                }
               }
             ],
             "muv": [
@@ -228,7 +1289,15 @@
                   "price": "₹9.35 Lakh",
                   "badge": "Assured"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_ertiga" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_ertiga"
+                    }
+                  }
+                }
               },
               {
                 "id": "car_innova",
@@ -239,86 +1308,141 @@
                   "subtitle": "52,000 km · Diesel · Manual",
                   "price": "₹17.80 Lakh"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_innova" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_innova"
+                    }
+                  }
+                }
               },
               {
-                "id": "car_carens",
+                "id": "car_carens_used",
                 "type": "CarCard",
                 "props": {
-                  "imageUrl": "https://picsum.photos/seed/carens/400/300",
+                  "imageUrl": "https://picsum.photos/seed/carensused/400/300",
                   "title": "Kia Carens Luxury Plus 2022",
                   "subtitle": "12,700 km · Diesel · Automatic",
                   "price": "₹15.60 Lakh",
                   "badge": "New arrival"
                 },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_carens" } } }
-              },
-              {
-                "id": "car_xl6",
-                "type": "CarCard",
-                "props": {
-                  "imageUrl": "https://picsum.photos/seed/xl6/400/300",
-                  "title": "Maruti Suzuki XL6 Alpha 2021",
-                  "subtitle": "26,900 km · Petrol · Automatic",
-                  "price": "₹11.20 Lakh"
-                },
-                "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_xl6" } } }
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_detail",
+                      "carId": "car_carens_used"
+                    }
+                  }
+                }
               }
             ]
           }
         }
       },
       {
-        "id": "value_prop_strip",
-        "type": "ValuePropStrip",
-        "style": { "padding": [0, 8, 0, 8] },
-        "props": {
-          "items": [
-            { "icon": "🛡️", "label": "140-point\ninspected" },
-            { "icon": "🔄", "label": "5-day money\nback" },
-            { "icon": "📄", "label": "1-year\nwarranty" },
-            { "icon": "🚚", "label": "Free home\ndelivery" }
-          ]
-        }
-      },
-      {
         "id": "cta_check_emi",
         "type": "Button",
-        "style": { "margin": [16, 8, 16, 8] },
-        "props": { "label": "Calculate EMI — Hyundai Creta ₹13.75L" },
+        "style": {
+          "margin": [
+            16,
+            12,
+            16,
+            4
+          ]
+        },
+        "props": {
+          "label": "Calculate EMI — Hyundai Creta ₹13.75L",
+          "_note": "Not from the real screenshots — added to satisfy the assignment's required tenure-selector + bottom-sheet demo."
+        },
         "actions": {
-          "onClick": { "type": "openSheet", "target": "sheet_emi_creta" }
+          "onClick": {
+            "type": "openSheet",
+            "target": "sheet_emi_creta"
+          }
         },
         "children": [
           {
             "id": "sheet_emi_creta",
             "type": "Column",
-            "style": { "padding": [20, 20, 20, 24] },
+            "style": {
+              "padding": [
+                20,
+                20,
+                20,
+                24
+              ]
+            },
             "props": {},
             "children": [
               {
                 "id": "sheet_title",
                 "type": "Text",
-                "props": { "text": "Hyundai Creta SX 2021 · ₹13.75 Lakh", "size": 18, "weight": "bold" }
+                "props": {
+                  "text": "Hyundai Creta SX 2021 · ₹13.75 Lakh",
+                  "size": 18,
+                  "weight": "bold"
+                }
               },
-              { "id": "sheet_spacer_1", "type": "Spacer", "props": { "height": 12 } },
+              {
+                "id": "sheet_spacer_1",
+                "type": "Spacer",
+                "props": {
+                  "height": 12
+                }
+              },
               {
                 "id": "sheet_tenure_label",
                 "type": "Text",
-                "props": { "text": "Choose loan tenure", "size": 13, "color": "#616161" }
+                "props": {
+                  "text": "Choose loan tenure",
+                  "size": 13,
+                  "color": "#616161"
+                }
               },
-              { "id": "sheet_spacer_2", "type": "Spacer", "props": { "height": 8 } },
+              {
+                "id": "sheet_spacer_2",
+                "type": "Spacer",
+                "props": {
+                  "height": 8
+                }
+              },
               {
                 "id": "sheet_tenure_chip_row",
                 "type": "ChipRow",
-                "style": { "padding": [0, 0, 0, 0] },
+                "style": {
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    0
+                  ]
+                },
                 "props": {
                   "defaultSelected": "36",
                   "items": [
-                    { "id": "t12", "label": "12 months", "value": "12" },
-                    { "id": "t36", "label": "36 months", "value": "36" },
-                    { "id": "t60", "label": "60 months", "value": "60" },
-                    { "id": "t84", "label": "84 months", "value": "84" }
+                    {
+                      "id": "t12",
+                      "label": "12 months",
+                      "value": "12"
+                    },
+                    {
+                      "id": "t36",
+                      "label": "36 months",
+                      "value": "36"
+                    },
+                    {
+                      "id": "t60",
+                      "label": "60 months",
+                      "value": "60"
+                    },
+                    {
+                      "id": "t84",
+                      "label": "84 months",
+                      "value": "84"
+                    }
                   ]
                 },
                 "actions": {
@@ -329,7 +1453,13 @@
                   }
                 }
               },
-              { "id": "sheet_spacer_3", "type": "Spacer", "props": { "height": 16 } },
+              {
+                "id": "sheet_spacer_3",
+                "type": "Spacer",
+                "props": {
+                  "height": 16
+                }
+              },
               {
                 "id": "sheet_emi_result",
                 "type": "Column",
@@ -338,78 +1468,69 @@
                   "stateKey": "selectedTenure",
                   "variants": {
                     "default": [
-                      { "id": "emi_default", "type": "Text", "props": { "text": "EMI: ₹44,150 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                      {
+                        "id": "emi_default",
+                        "type": "Text",
+                        "props": {
+                          "text": "EMI: ₹44,150 / month",
+                          "size": 22,
+                          "weight": "bold",
+                          "color": "#2E7D32"
+                        }
+                      }
                     ],
                     "12": [
-                      { "id": "emi_12", "type": "Text", "props": { "text": "EMI: ₹1,20,850 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                      {
+                        "id": "emi_12",
+                        "type": "Text",
+                        "props": {
+                          "text": "EMI: ₹1,20,850 / month",
+                          "size": 22,
+                          "weight": "bold",
+                          "color": "#2E7D32"
+                        }
+                      }
                     ],
                     "36": [
-                      { "id": "emi_36", "type": "Text", "props": { "text": "EMI: ₹44,150 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                      {
+                        "id": "emi_36",
+                        "type": "Text",
+                        "props": {
+                          "text": "EMI: ₹44,150 / month",
+                          "size": 22,
+                          "weight": "bold",
+                          "color": "#2E7D32"
+                        }
+                      }
                     ],
                     "60": [
-                      { "id": "emi_60", "type": "Text", "props": { "text": "EMI: ₹28,900 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                      {
+                        "id": "emi_60",
+                        "type": "Text",
+                        "props": {
+                          "text": "EMI: ₹28,900 / month",
+                          "size": 22,
+                          "weight": "bold",
+                          "color": "#2E7D32"
+                        }
+                      }
                     ],
                     "84": [
-                      { "id": "emi_84", "type": "Text", "props": { "text": "EMI: ₹21,750 / month", "size": 22, "weight": "bold", "color": "#2E7D32" } }
+                      {
+                        "id": "emi_84",
+                        "type": "Text",
+                        "props": {
+                          "text": "EMI: ₹21,750 / month",
+                          "size": 22,
+                          "weight": "bold",
+                          "color": "#2E7D32"
+                        }
+                      }
                     ]
                   }
                 }
               }
             ]
-          }
-        ]
-      },
-      {
-        "id": "grid_certified_cars",
-        "type": "Grid",
-        "props": { "title": "Certified cars this week", "columns": 2, "rows": 2 },
-        "children": [
-          {
-            "id": "car_grid_venue",
-            "type": "CarCard",
-            "props": {
-              "imageUrl": "https://picsum.photos/seed/venue/400/300",
-              "title": "Hyundai Venue S 2021",
-              "subtitle": "19,800 km · Petrol",
-              "price": "₹8.75 Lakh",
-              "badge": "Assured"
-            },
-            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_venue" } } }
-          },
-          {
-            "id": "car_grid_brezza",
-            "type": "CarCard",
-            "props": {
-              "imageUrl": "https://picsum.photos/seed/brezza/400/300",
-              "title": "Maruti Suzuki Brezza ZXI 2022",
-              "subtitle": "9,300 km · Petrol",
-              "price": "₹10.90 Lakh",
-              "badge": "New arrival"
-            },
-            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_brezza" } } }
-          },
-          {
-            "id": "car_grid_thar",
-            "type": "CarCard",
-            "props": {
-              "imageUrl": "https://picsum.photos/seed/thar/400/300",
-              "title": "Mahindra Thar LX 2021",
-              "subtitle": "15,600 km · Diesel",
-              "price": "₹14.10 Lakh"
-            },
-            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_thar" } } }
-          },
-          {
-            "id": "car_grid_punch",
-            "type": "CarCard",
-            "props": {
-              "imageUrl": "https://picsum.photos/seed/punch/400/300",
-              "title": "Tata Punch Creative 2022",
-              "subtitle": "11,200 km · Petrol",
-              "price": "₹7.35 Lakh",
-              "badge": "Assured"
-            },
-            "actions": { "onClick": { "type": "navigate", "payload": { "route": "car_detail", "carId": "car_grid_punch" } } }
           }
         ]
       },
@@ -422,18 +1543,875 @@
         }
       },
       {
-        "id": "footer_cta_sell",
-        "type": "FooterCta",
-        "style": { "margin": [0, 8, 0, 24] },
-        "props": {
-          "title": "Have a car to sell?",
-          "subtitle": "Get the best price, doorstep pickup, instant payment.",
-          "buttonLabel": "Get a free quote",
-          "background": "#FFE0B2"
+        "id": "manage_vehicle_grid",
+        "type": "Grid",
+        "style": {
+          "background": "#4527A0",
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
         },
-        "actions": {
-          "onClick": { "type": "navigate", "payload": { "route": "sell_flow" } }
+        "props": {
+          "title": "Manage your vehicle",
+          "addVehicleLabel": "+ Add vehicle",
+          "columns": 3,
+          "rows": 2,
+          "_note": "addVehicleLabel is a trailing header link in the real app — ignored today, Grid only renders the plain title."
+        },
+        "children": [
+          {
+            "id": "manage_pay_challan",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "pay_challan"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_pay_challan_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/paychallan/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_pay_challan_text",
+                "type": "Text",
+                "props": {
+                  "text": "Pay challan",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "manage_recharge_fastag",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "recharge_fastag"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_recharge_fastag_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/fastag/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_recharge_fastag_text",
+                "type": "Text",
+                "props": {
+                  "text": "Recharge FASTag",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "manage_get_insurance",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "get_insurance"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_get_insurance_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/getinsurance/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_get_insurance_text",
+                "type": "Text",
+                "props": {
+                  "text": "Get insurance",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "manage_cash_against_car",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "cash_against_car"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_cash_against_car_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/cashagainstcar/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_cash_against_car_text",
+                "type": "Text",
+                "props": {
+                  "text": "Cash against car",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "manage_road_side_assistance",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "road_side_assistance"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_road_side_assistance_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/roadsideassist/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_road_side_assistance_text",
+                "type": "Text",
+                "props": {
+                  "text": "Road side assistance",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          },
+          {
+            "id": "manage_get_warranty",
+            "type": "Column",
+            "style": {
+              "background": "#FFFFFF",
+              "cornerRadius": 16,
+              "padding": [
+                12,
+                16,
+                12,
+                16
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "get_warranty"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "manage_get_warranty_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/getwarranty/160/160",
+                  "width": 48,
+                  "height": 48
+                }
+              },
+              {
+                "id": "manage_get_warranty_text",
+                "type": "Text",
+                "props": {
+                  "text": "Get warranty",
+                  "size": 13,
+                  "weight": "medium"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spotify_banner",
+        "type": "BannerCarousel",
+        "style": {
+          "margin": [
+            0,
+            8,
+            0,
+            8
+          ]
+        },
+        "props": {
+          "items": [
+            {
+              "id": "promo_spotify_orbit",
+              "title": "Cars24 x Spotify Premium\nAdd your car to Orbit — 3 months Spotify Premium free",
+              "background": "#1B3A2E",
+              "route": "spotify_orbit"
+            }
+          ]
         }
+      },
+      {
+        "id": "showrooms_rail",
+        "type": "CarouselRail",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "7 showrooms in your city"
+        },
+        "children": [
+          {
+            "id": "showroom_nexus_mall",
+            "type": "Column",
+            "style": {
+              "background": "#F5F5F5",
+              "cornerRadius": 12,
+              "padding": [
+                0,
+                0,
+                0,
+                12
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "showroom_detail",
+                  "showroomId": "nexus_mall"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "showroom_nexus_mall_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/nexusmall/400/220",
+                  "width": 260,
+                  "height": 130
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_count",
+                "type": "Text",
+                "props": {
+                  "text": "70+ cars",
+                  "size": 12,
+                  "weight": "medium"
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_name",
+                "type": "Text",
+                "props": {
+                  "text": "Nexus Mall",
+                  "size": 15,
+                  "weight": "bold"
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_loc",
+                "type": "Text",
+                "props": {
+                  "text": "Koramangala, Bangalore",
+                  "size": 12,
+                  "color": "#616161"
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_dist",
+                "type": "Text",
+                "props": {
+                  "text": "1.5 km away · Get directions",
+                  "size": 12,
+                  "color": "#4527A0"
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_hours",
+                "type": "Text",
+                "props": {
+                  "text": "Open · Closes at 08:00 PM",
+                  "size": 12,
+                  "color": "#2E7D32"
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_spacer",
+                "type": "Spacer",
+                "props": {
+                  "height": 8
+                }
+              },
+              {
+                "id": "showroom_nexus_mall_actions",
+                "type": "Row",
+                "props": {
+                  "_note": "Real app: one outlined + one filled button side by side. Button has no outlined/filled variant prop yet — both render as the same default filled style."
+                },
+                "children": [
+                  {
+                    "id": "showroom_nexus_mall_call",
+                    "type": "Button",
+                    "props": {
+                      "label": "Call us now"
+                    },
+                    "actions": {
+                      "onClick": {
+                        "type": "navigate",
+                        "payload": {
+                          "route": "call_showroom",
+                          "showroomId": "nexus_mall"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "id": "showroom_nexus_mall_view",
+                    "type": "Button",
+                    "props": {
+                      "label": "View showroom"
+                    },
+                    "actions": {
+                      "onClick": {
+                        "type": "navigate",
+                        "payload": {
+                          "route": "showroom_detail",
+                          "showroomId": "nexus_mall"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "showroom_ganganagar",
+            "type": "Column",
+            "style": {
+              "background": "#F5F5F5",
+              "cornerRadius": 12,
+              "padding": [
+                0,
+                0,
+                0,
+                12
+              ]
+            },
+            "props": {},
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "showroom_detail",
+                  "showroomId": "ganganagar"
+                }
+              }
+            },
+            "children": [
+              {
+                "id": "showroom_ganganagar_img",
+                "type": "Image",
+                "props": {
+                  "url": "https://picsum.photos/seed/ganganagar/400/220",
+                  "width": 260,
+                  "height": 130
+                }
+              },
+              {
+                "id": "showroom_ganganagar_count",
+                "type": "Text",
+                "props": {
+                  "text": "90+ cars",
+                  "size": 12,
+                  "weight": "medium"
+                }
+              },
+              {
+                "id": "showroom_ganganagar_name",
+                "type": "Text",
+                "props": {
+                  "text": "Cars24 Ganganagar Hub",
+                  "size": 15,
+                  "weight": "bold"
+                }
+              },
+              {
+                "id": "showroom_ganganagar_loc",
+                "type": "Text",
+                "props": {
+                  "text": "Ganganagar, Bangalore",
+                  "size": 12,
+                  "color": "#616161"
+                }
+              },
+              {
+                "id": "showroom_ganganagar_dist",
+                "type": "Text",
+                "props": {
+                  "text": "7.0 km away · Get directions",
+                  "size": 12,
+                  "color": "#4527A0"
+                }
+              },
+              {
+                "id": "showroom_ganganagar_hours",
+                "type": "Text",
+                "props": {
+                  "text": "Open · Closes at 09:00 PM",
+                  "size": 12,
+                  "color": "#2E7D32"
+                }
+              },
+              {
+                "id": "showroom_ganganagar_spacer",
+                "type": "Spacer",
+                "props": {
+                  "height": 8
+                }
+              },
+              {
+                "id": "showroom_ganganagar_actions",
+                "type": "Row",
+                "props": {},
+                "children": [
+                  {
+                    "id": "showroom_ganganagar_call",
+                    "type": "Button",
+                    "props": {
+                      "label": "Call us now"
+                    },
+                    "actions": {
+                      "onClick": {
+                        "type": "navigate",
+                        "payload": {
+                          "route": "call_showroom",
+                          "showroomId": "ganganagar"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "id": "showroom_ganganagar_view",
+                    "type": "Button",
+                    "props": {
+                      "label": "View showroom"
+                    },
+                    "actions": {
+                      "onClick": {
+                        "type": "navigate",
+                        "payload": {
+                          "route": "showroom_detail",
+                          "showroomId": "ganganagar"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "trending_new_cars_rail",
+        "type": "CarouselRail",
+        "style": {
+          "margin": [
+            0,
+            4,
+            0,
+            4
+          ]
+        },
+        "props": {
+          "title": "Trending new cars",
+          "viewAllLabel": "View all",
+          "_note": "Real app shows a large rank-number watermark (1/2/3) behind each card, not a small badge — CarCard's badge prop is used here as a stand-in, not a true rank watermark."
+        },
+        "children": [
+          {
+            "id": "new_car_seltos",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/seltosnew/400/300",
+              "title": "Seltos",
+              "subtitle": "Kia",
+              "badge": "#1"
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "new_car_detail",
+                  "carId": "seltos"
+                }
+              }
+            }
+          },
+          {
+            "id": "new_car_sonet",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/sonetnew/400/300",
+              "title": "Sonet",
+              "subtitle": "Kia",
+              "badge": "#2"
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "new_car_detail",
+                  "carId": "sonet"
+                }
+              }
+            }
+          },
+          {
+            "id": "new_car_syros",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/syrosnew/400/300",
+              "title": "Syros",
+              "subtitle": "Kia",
+              "badge": "#3"
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "new_car_detail",
+                  "carId": "syros"
+                }
+              }
+            }
+          },
+          {
+            "id": "new_car_carens",
+            "type": "CarCard",
+            "props": {
+              "imageUrl": "https://picsum.photos/seed/carensnew/400/300",
+              "title": "Carens",
+              "subtitle": "Kia",
+              "badge": "#4"
+            },
+            "actions": {
+              "onClick": {
+                "type": "navigate",
+                "payload": {
+                  "route": "new_car_detail",
+                  "carId": "carens"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "recommended_match_card",
+        "type": "Row",
+        "style": {
+          "margin": [
+            16,
+            8,
+            16,
+            8
+          ],
+          "background": "#FFFFFF",
+          "cornerRadius": 12
+        },
+        "props": {
+          "_note": "Composed from generic Row/Column/Text/Button primitives, no new component type — approximates the real split illustration+text card; the circular arrow icon-button is stood in with a plain labeled Button since there's no icon-only button style yet."
+        },
+        "children": [
+          {
+            "id": "recommended_match_img",
+            "type": "Image",
+            "props": {
+              "url": "https://picsum.photos/seed/matchillustration/300/300",
+              "width": 110,
+              "height": 130
+            }
+          },
+          {
+            "id": "recommended_match_text_col",
+            "type": "Column",
+            "style": {
+              "padding": [
+                12,
+                12,
+                12,
+                12
+              ]
+            },
+            "props": {},
+            "children": [
+              {
+                "id": "recommended_badge",
+                "type": "Text",
+                "props": {
+                  "text": "Recommended",
+                  "size": 11,
+                  "weight": "bold",
+                  "color": "#4527A0"
+                }
+              },
+              {
+                "id": "recommended_headline",
+                "type": "Text",
+                "props": {
+                  "text": "Let us find your match",
+                  "size": 15,
+                  "weight": "bold"
+                }
+              },
+              {
+                "id": "recommended_desc",
+                "type": "Text",
+                "props": {
+                  "text": "Answer a few simple questions and get your perfect car match in 60 seconds.",
+                  "size": 12,
+                  "color": "#616161"
+                }
+              },
+              {
+                "id": "recommended_cta_row",
+                "type": "Row",
+                "props": {},
+                "actions": {
+                  "onClick": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "car_match_quiz"
+                    }
+                  }
+                },
+                "children": [
+                  {
+                    "id": "recommended_cta_text",
+                    "type": "Text",
+                    "props": {
+                      "text": "Find my perfect match",
+                      "size": 13,
+                      "weight": "bold",
+                      "color": "#4527A0"
+                    }
+                  },
+                  {
+                    "id": "recommended_cta_arrow",
+                    "type": "Button",
+                    "props": {
+                      "label": "→"
+                    },
+                    "actions": {
+                      "onClick": {
+                        "type": "navigate",
+                        "payload": {
+                          "route": "car_match_quiz"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "offer_banner_carousel",
+        "type": "BannerCarousel",
+        "style": {
+          "margin": [
+            0,
+            8,
+            0,
+            8
+          ]
+        },
+        "props": {
+          "items": [
+            {
+              "id": "promo_return_guarantee",
+              "title": "30 DAY RETURN GUARANTEE\nWe take it back as easily as we deliver it",
+              "background": "#1565C0",
+              "route": "return_policy"
+            },
+            {
+              "id": "promo_inspection_network",
+              "title": "200+ point inspection\nIndia's largest car inspection network",
+              "background": "#00695C",
+              "route": "inspection_network"
+            }
+          ]
+        }
+      },
+      {
+        "id": "crashfree_banner",
+        "type": "BannerCarousel",
+        "style": {
+          "margin": [
+            0,
+            8,
+            0,
+            8
+          ]
+        },
+        "props": {
+          "items": [
+            {
+              "id": "promo_crashfree_india",
+              "title": "CRASHFREE INDIA\nControl. Judgment. Patience.\nIndia drives safer with M.S Dhoni",
+              "background": "#4527A0",
+              "route": "crashfree_campaign"
+            }
+          ]
+        }
+      },
+      {
+        "id": "brand_footer",
+        "type": "Column",
+        "style": {
+          "background": "#4527A0",
+          "padding": [
+            24,
+            40,
+            24,
+            40
+          ]
+        },
+        "props": {},
+        "children": [
+          {
+            "id": "brand_footer_headline",
+            "type": "Text",
+            "props": {
+              "text": "better drives,\nbetter lives",
+              "size": 34,
+              "weight": "bold",
+              "color": "#FFFFFF"
+            }
+          },
+          {
+            "id": "brand_footer_spacer",
+            "type": "Spacer",
+            "props": {
+              "height": 24
+            }
+          },
+          {
+            "id": "brand_footer_tagline",
+            "type": "Text",
+            "props": {
+              "text": "Made with ❤️ in Gurugram",
+              "size": 15,
+              "color": "#FFFFFF"
+            }
+          }
+        ]
       }
     ]
   }

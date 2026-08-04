@@ -22,14 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hardik.the_server_driven_ui.perf.PerfTrace
 import com.hardik.the_server_driven_ui.sdui.action.ActionDispatcher
 import com.hardik.the_server_driven_ui.sdui.action.buildNodeIndex
 import com.hardik.the_server_driven_ui.sdui.loader.JsonPageLoader
+import com.hardik.the_server_driven_ui.sdui.perf.PerfTrace
 import com.hardik.the_server_driven_ui.sdui.renderer.RenderNode
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiPage
 import com.hardik.the_server_driven_ui.sdui.renderer.buildDefaultRegistry
 import com.hardik.the_server_driven_ui.sdui.state.SduiStateStore
+import com.hardik.the_server_driven_ui.sdui.validation.SduiValidator
+
 import com.hardik.the_server_driven_ui.ui.theme.TheServerDrivenUITheme
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +61,17 @@ fun SduiHomeScreen(modifier: Modifier = Modifier) {
 
     val pageSchema = remember { JsonPageLoader.loadFromAssets(context, "sdui/landing_page.json") }
     val registry = remember { buildDefaultRegistry() }
-    val nodeIndex = remember(pageSchema) { buildNodeIndex(pageSchema.page.sections) }
+
+    // Catch bad JSON before it reaches the renderer: duplicate ids (would
+    // crash a lazy list's key()), an openSheet pointing at a target that
+    // doesn't exist, a ChipRow with no onSelect.target, etc. Sanitized
+    // sections are what actually gets rendered below.
+    val validatedSections = remember(pageSchema, registry) {
+        SduiValidator.validateAndLog(pageSchema.page.sections, registry)
+    }
+    val page = remember(pageSchema, validatedSections) { pageSchema.page.copy(sections = validatedSections) }
+
+    val nodeIndex = remember(page) { buildNodeIndex(page.sections) }
     val actionDispatcher = remember(nodeIndex) {
         ActionDispatcher(
             stateStore = stateStore,
@@ -78,7 +90,7 @@ fun SduiHomeScreen(modifier: Modifier = Modifier) {
     var firstFrameReported by remember { mutableStateOf(false) }
 
     SduiPage(
-        page = pageSchema.page,
+        page = page,
         registry = registry,
         stateStore = stateStore,
         actionDispatcher = actionDispatcher,

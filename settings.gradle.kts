@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "The-Server-Driven-UI"
 include(":app")
- 
+include(":sdui")

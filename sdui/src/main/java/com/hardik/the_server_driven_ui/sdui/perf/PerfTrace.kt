@@ -1,4 +1,4 @@
-package com.hardik.the_server_driven_ui.perf
+package com.hardik.the_server_driven_ui.sdui.perf
 
 import android.util.Log
 
@@ -8,6 +8,10 @@ import android.util.Log
  * connected device to set up; these markers plus Android's own
  * automatic "Displayed"/"Fully drawn" logcat lines get honest,
  * reproducible numbers with a single `adb logcat` command instead.
+ *
+ * Lives in the sdui module (not the host app) because both the renderer
+ * itself (JsonPageLoader's read/parse timing) and any host app's own
+ * activity-level markers need it — a shared, dependency-free utility.
  *
  * Filter with: adb logcat -s PERF_TRACE:D ActivityTaskManager:I
  */
