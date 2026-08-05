@@ -152,16 +152,24 @@ fun RenderNode(
  * Precomputed content variants (e.g. category-chip selection swapping a
  * rail's cars) resolve here: the server ships every variant, the client
  * only picks one. No runtime filter/query logic on the client.
+ *
+ * `internal` rather than `private` specifically so this pure function is
+ * reachable from a plain JVM unit test without needing Compose test
+ * infrastructure — see `sdui/src/test`.
  */
-private fun resolveDataBinding(node: SduiNode, state: Map<String, String>): SduiNode {
+internal fun resolveDataBinding(node: SduiNode, state: Map<String, String>): SduiNode {
     val binding = node.dataBinding ?: return node
     val selected = state[binding.stateKey]
     val variant = binding.variants[selected] ?: binding.variants["default"] ?: return node
     return node.copy(children = variant)
 }
 
-/** Resolves [com.hardik.the_server_driven_ui.sdui.model.ColorBinding] into `style.background` — see its kdoc. */
-private fun resolveColorBinding(node: SduiNode, state: Map<String, String>): SduiNode {
+/**
+ * Resolves [com.hardik.the_server_driven_ui.sdui.model.ColorBinding] into
+ * `style.background` — see its kdoc. `internal` for the same
+ * unit-testability reason as [resolveDataBinding].
+ */
+internal fun resolveColorBinding(node: SduiNode, state: Map<String, String>): SduiNode {
     val binding = node.colorBinding ?: return node
     val selected = state[binding.stateKey]
     val hex = binding.variants[selected] ?: binding.variants["default"] ?: return node

@@ -56,13 +56,21 @@ static style), and the `tab_body` node's `dataBinding` scoped to the
 *entire* page body — so selecting "Buy used car" swaps all 17 sections at
 once, not just one rail.
 
-**What got flagged rather than silently shipped**: the real Cars24 app
-pins the search bar + tab row while only the location row scrolls away.
-This schema doesn't have a sticky/pinned-region concept yet, so only the
-location row's collapse was implemented — and the JSON itself carries a
-`_note` on `nav_tab_chips` saying so explicitly, rather than the gap being
-discovered later by someone reading the code. That note is also what
-`COVERAGE.md`'s honest-gap-listing is supposed to look like in practice.
+**A gap flagged in the JSON that turned out not to be one**: `nav_tab_chips`
+carries a `_note` worrying that the search bar + tab row aren't truly
+"pinned" the way the real Cars24 app does it, since the schema has no
+explicit sticky/pinned-region concept. Re-verified this directly on
+physical hardware while writing this doc (scrolled deep past "Manage your
+vehicle" into "7 showrooms in your city") — search+tabs stay fixed at the
+top the entire time. They're pinned for free, as a structural side effect
+of the header rendering in its own `Column` *above* the body `LazyColumn*`
+rather than inside it: once the location row's height collapses to 0, the
+header `Column`'s remaining height is just search+tabs, permanently, and
+the `LazyColumn` beneath it scrolls independently. The `_note`'s caution
+was reasonable to write at the time but turned out to be overly
+pessimistic — worth catching before it became a false "known gap" in
+`COVERAGE.md`. (The one real, still-open pinned-region gap is a *bottom*
+sticky action bar, tracked separately in `COVERAGE.md`.)
 
 ### 3. Debugging why the challan tab looked broken on-device — a schema-level layout bug, not a data bug
 
@@ -174,3 +182,15 @@ than taken as a closed book.
   against the static twin. The same discipline caught the first fix
   attempt's regression (see story 3) — re-screenshotting after a "fix"
   rather than assuming it worked because the reasoning sounded right.
+- **Real unit tests for the pure logic, not just manual on-device
+  checks.** `SduiValidator.validate`, `resolveDataBinding`/
+  `resolveColorBinding`, and `ActionDispatcher` are covered by 28 JUnit
+  tests in `sdui/src/test` (duplicate-id detection, dangling `openSheet`
+  targets, variant fallback-to-default, state-write plumbing). The two
+  renderer functions were `private`; made `internal` specifically so
+  they're reachable from a plain JVM test without pulling in Compose test
+  infrastructure — a deliberate, narrow visibility change, not a
+  loosening of the module's public API. `validateAndLog` and two
+  `ActionDispatcher` branches call `android.util.Log` directly and were
+  left untested rather than pulled in Robolectric to mock it — a scoping
+  call worth being explicit about rather than silently skipping.

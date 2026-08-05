@@ -14,8 +14,11 @@
 | `Divider` | Leaf | — | |
 | `Button` | Interactive leaf | `label` | Fires `onClick` |
 | `ChipRow` | Interactive leaf | `items[]` (`id`,`label`,`value`), `defaultSelected` | Fires `onSelect`; selection writes to state via `payloadFromEvent: "value"` |
+| `TextField` | Interactive leaf | `stateKey`, `placeholder`, `label`, `singleLine`, `borderColor` | Real editable input (not decorative) — value lives in `SduiStateStore` under `stateKey`, every keystroke dispatches `updateState` through the same `ActionDispatcher` path any other interactive component uses. No `fillMaxWidth()` default (see kdoc) since it commonly sits next to a fixed-width sibling. |
+| `Chip` | Composite | `label`, `textColor`, `weight`, `size` | Small pill/badge, sized to its own content (no default width/background — `style` controls appearance entirely, like `Button`) |
+| `ListRow` | Composite | `imageUrl`, `imageSize`, `title`, `subtitle`, `subtitleColor`, `trailing` (`"chevron"` or arbitrary text) | Generalizes the "image + title/subtitle + trailing accessory" pattern that used to be ~40 lines of hand-composed `Row`/`Column`/`Text` per instance |
 | `CarCard` | Composite | `imageUrl`, `title`, `subtitle`, `price`, `badge` | Fires `onClick` |
-| `BannerCarousel` | Composite | `items[]` (`imageUrl`\|`background`, `title`, `route`) | |
+| `BannerCarousel` | Composite | `items[]` (`imageUrl`\|`background`, `title`, `route`) | Real center-focused carousel — the visible/center item renders at full scale, neighbors shrink with distance from center, and releasing a swipe snaps to the nearest item (`rememberSnapFlingBehavior`) rather than settling on momentum alone |
 | `SearchHeader` | Composite | `title`, `placeholder` | Fires `onClick` |
 | `ValuePropStrip` | Composite | `items[]` (`icon`, `label`) | Static trust-badge row |
 | `FooterCta` | Composite | `title`, `subtitle`, `buttonLabel`, `background` | Fires `onClick` |
@@ -40,7 +43,8 @@
 - **Sticky/pinned regions** (a bottom action bar that stays fixed while the rest of the page scrolls). The renderer currently puts the whole page in one `LazyColumn`; a pinned region needs a page-level structural field (e.g. `page.stickyFooter: SduiNode?`) plus a client change to route it into `Scaffold`'s `bottomBar` slot instead of the scroll list.
 - **Overlay/stacked layout** (e.g. a wishlist icon floating on top of a carousel image). No generic `Box`-with-overlay-children type is registered — composites that need this today (badges on `CarCard`) have it hardcoded inside that one composite, not as something JSON can compose generically yet.
 - **Expand/collapse (accordion) content.** No component holds open/closed UI state tied to a toggle action.
-- **No dedicated `Chip`/`Pill` or `ListRow` (icon/image + title/subtitle + trailing accessory) component.** These patterns are currently hand-composed from raw `Row`/`Column` primitives wherever they appear (the challan form's country-code chip, the "uncover frauds" rows with a trailing chevron) — which is exactly what caused a real layout bug (see `AI_WORKFLOW.md`'s third story): a nested `Column`/`Row` defaulting to `fillMaxWidth()` starved its sibling of space. The bug is fixed at the renderer level now, but the underlying fragility remains — every new hand-composed instance of this pattern is a fresh chance to get the layout wrong. A dedicated `Chip`/`ListRow` type would close this off structurally and shrink the JSON (the fraud-list rows alone are ~40 lines of primitives each; a `ListRow` node could express the same in ~10). Scoped out for time, not forgotten.
+
+**Closed since the last pass**: a dedicated `Chip`/`ListRow` component (see registry table above) now replaces the hand-composed `Row`/`Column` pattern that caused a real layout bug (`AI_WORKFLOW.md`'s third story — a nested container defaulting to `fillMaxWidth()` starved its sibling of space). `landing_page.json`'s challan country-code chip and all three "uncover frauds" rows have been migrated to the new components — each fraud row went from ~40 lines of primitives to ~10 lines of `ListRow` props, and the bug class is now structurally impossible for new instances of this pattern, not just patched at the two sites it was first found.
 
 ## Honest coverage claim
 

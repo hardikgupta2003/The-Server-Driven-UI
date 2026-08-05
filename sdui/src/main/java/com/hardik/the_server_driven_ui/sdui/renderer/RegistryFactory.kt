@@ -4,16 +4,19 @@ import com.hardik.the_server_driven_ui.sdui.components.bannerCarouselComponent
 import com.hardik.the_server_driven_ui.sdui.components.buttonComponent
 import com.hardik.the_server_driven_ui.sdui.components.carCardComponent
 import com.hardik.the_server_driven_ui.sdui.components.carouselRailComponent
+import com.hardik.the_server_driven_ui.sdui.components.chipComponent
 import com.hardik.the_server_driven_ui.sdui.components.chipRowComponent
 import com.hardik.the_server_driven_ui.sdui.components.columnComponent
 import com.hardik.the_server_driven_ui.sdui.components.dividerComponent
 import com.hardik.the_server_driven_ui.sdui.components.footerCtaComponent
 import com.hardik.the_server_driven_ui.sdui.components.gridComponent
 import com.hardik.the_server_driven_ui.sdui.components.imageComponent
+import com.hardik.the_server_driven_ui.sdui.components.listRowComponent
 import com.hardik.the_server_driven_ui.sdui.components.rowComponent
 import com.hardik.the_server_driven_ui.sdui.components.searchHeaderComponent
 import com.hardik.the_server_driven_ui.sdui.components.spacerComponent
 import com.hardik.the_server_driven_ui.sdui.components.textComponent
+import com.hardik.the_server_driven_ui.sdui.components.textFieldComponent
 import com.hardik.the_server_driven_ui.sdui.components.valuePropStripComponent
 
 /**
@@ -38,6 +41,7 @@ fun buildDefaultRegistry(): ComponentRegistry = ComponentRegistry().apply {
     // Interactive leaves
     register("Button", buttonComponent)
     register("ChipRow", chipRowComponent)
+    register("TextField", textFieldComponent)
 
     // Composite / domain
     register("CarCard", carCardComponent)
@@ -45,4 +49,6 @@ fun buildDefaultRegistry(): ComponentRegistry = ComponentRegistry().apply {
     register("SearchHeader", searchHeaderComponent)
     register("ValuePropStrip", valuePropStripComponent)
     register("FooterCta", footerCtaComponent)
+    register("Chip", chipComponent)
+    register("ListRow", listRowComponent)
 }

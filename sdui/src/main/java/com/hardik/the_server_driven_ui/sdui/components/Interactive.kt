@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
@@ -42,6 +43,7 @@ import com.hardik.the_server_driven_ui.sdui.model.intOr
 import com.hardik.the_server_driven_ui.sdui.model.objList
 import com.hardik.the_server_driven_ui.sdui.model.str
 import com.hardik.the_server_driven_ui.sdui.model.strOrEmpty
+import com.hardik.the_server_driven_ui.sdui.model.SduiAction
 import com.hardik.the_server_driven_ui.sdui.renderer.CollapsibleOnHide
 import com.hardik.the_server_driven_ui.sdui.renderer.LocalSduiCollapseFraction
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
@@ -247,4 +249,50 @@ val buttonComponent: SduiComponent = { node, context ->
     ) {
         Text(label)
     }
+}
+
+/**
+ * A real, typable text input — unlike `SearchHeader`'s decorative
+ * read-only field, this one is actually editable. Value lives in
+ * `SduiStateStore` under `props.stateKey`, same store chip selections and
+ * the EMI tenure sheet already use; every keystroke dispatches an
+ * `updateState` action through the same `ActionDispatcher` path any other
+ * interactive component uses, rather than a component-local `var` — so a
+ * typed value is visible to `dataBinding`/`colorBinding` elsewhere on the
+ * page immediately, same as a chip selection would be.
+ */
+val textFieldComponent: SduiComponent = { node, context ->
+    val stateKey = node.props.str("stateKey")
+    val placeholder = node.props.strOrEmpty("placeholder")
+    val label = node.props.str("label")
+    val value = stateKey?.let { context.currentState[it] }.orEmpty()
+    // Defaults to borderless/transparent-outline: the common case in this
+    // schema is a TextField nested inside an already-bordered container
+    // (e.g. the challan form's outer Row), where Material3's own default
+    // outline would double up visually. `props.borderColor` opts back into
+    // a visible outline for a standalone use.
+    val borderColor = node.props.str("borderColor")?.let { parseHexColor(it) } ?: Color.Transparent
+
+    // No fillMaxWidth() default — same reasoning as columnComponent/
+    // rowComponent (see their kdoc): this node commonly sits in a Row next
+    // to a fixed-width sibling (e.g. the challan form's country-code
+    // chip), and defaulting to fillMaxWidth() there would starve that
+    // sibling exactly like the bug already fixed once. A node that wants
+    // full width sets `"width": "match"` explicitly.
+    OutlinedTextField(
+        value = value,
+        onValueChange = { newValue ->
+            stateKey?.let {
+                context.dispatch(SduiAction(type = "updateState", target = it), JsonPrimitive(newValue))
+            }
+        },
+        placeholder = { Text(placeholder) },
+        label = label?.let { text -> { Text(text) } },
+        singleLine = node.props.boolOr("singleLine", true),
+        colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = borderColor,
+            unfocusedBorderColor = borderColor,
+        ),
+        modifier = node.style.toModifier(),
+    )
 }

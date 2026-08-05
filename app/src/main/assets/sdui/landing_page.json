@@ -2281,7 +2281,7 @@
                     "id": "brand_footer_tagline",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -4556,7 +4556,7 @@
                     "id": "brand_footer_tagline__default",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -4900,7 +4900,7 @@
                     "id": "buy_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -5239,7 +5239,7 @@
                     "id": "sell_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -5666,7 +5666,7 @@
                     "id": "loans_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -5714,7 +5714,7 @@
                   "cornerRadius": 16
                 },
                 "props": {
-                  "_note": "Visual approximation only — there's no generic text-input/form component or free-text form state in the schema yet, so the registration-number field can't actually be typed into."
+                  "_note": "The registration-number field is a real editable TextField component (state key 'challanRegNumber'), not a static placeholder — typed input is visible to the rest of the page via the same state store chip selections use."
                 },
                 "children": [
                   {
@@ -5746,7 +5746,7 @@
                     "children": [
                       {
                         "id": "challan_form_country_chip",
-                        "type": "Column",
+                        "type": "Chip",
                         "style": {
                           "width": "wrap",
                           "background": "#392BCB",
@@ -5757,27 +5757,20 @@
                             10
                           ]
                         },
-                        "props": {},
-                        "children": [
-                          {
-                            "id": "challan_form_country_text",
-                            "type": "Text",
-                            "props": {
-                              "text": "IND",
-                              "size": 13,
-                              "weight": "bold",
-                              "color": "#FFFFFF"
-                            }
-                          }
-                        ]
+                        "props": {
+                          "label": "IND",
+                          "size": 13,
+                          "weight": "bold",
+                          "textColor": "#FFFFFF"
+                        }
                       },
                       {
                         "id": "challan_form_placeholder",
-                        "type": "Text",
+                        "type": "TextField",
                         "props": {
-                          "text": "(e.g. AB 12 CD 3456)",
-                          "size": 15,
-                          "color": "#B0B0B0"
+                          "placeholder": "e.g. AB 12 CD 3456",
+                          "stateKey": "challanRegNumber",
+                          "singleLine": true
                         }
                       }
                     ]
@@ -5981,7 +5974,7 @@
                     "id": "challan_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -6142,7 +6135,7 @@
                 "children": [
                   {
                     "id": "car_check_fraud_history",
-                    "type": "Row",
+                    "type": "ListRow",
                     "style": {
                       "padding": [
                         12,
@@ -6158,80 +6151,19 @@
                         4,
                         16,
                         4
-                      ],
-                      "justifyContent": "spaceBetween",
-                      "alignItems": "center"
+                      ]
                     },
-                    "props": {},
-                    "children": [
-                      {
-                        "id": "car_check_fraud_history_left",
-                        "type": "Row",
-                        "style": {
-                          "width": "wrap",
-                          "alignItems": "center"
-                        },
-                        "props": {},
-                        "children": [
-                          {
-                            "id": "car_check_fraud_history_img",
-                            "type": "Image",
-                            "props": {
-                              "url": "https://images.pexels.com/photos/1149137/pexels-photo-1149137.jpeg",
-                              "width": 48,
-                              "height": 48
-                            }
-                          },
-                          {
-                            "id": "car_check_fraud_history_text_col",
-                            "type": "Column",
-                            "style": {
-                              "padding": [
-                                12,
-                                0,
-                                0,
-                                0
-                              ]
-                            },
-                            "props": {},
-                            "children": [
-                              {
-                                "id": "car_check_fraud_history_title",
-                                "type": "Text",
-                                "props": {
-                                  "text": "Vehicle history report",
-                                  "size": 14,
-                                  "weight": "bold"
-                                }
-                              },
-                              {
-                                "id": "car_check_fraud_history_subtitle",
-                                "type": "Text",
-                                "props": {
-                                  "text": "Service records and Accidental check",
-                                  "size": 12,
-                                  "color": "#5B5B7A",
-                                  "maxLines": 2
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "id": "car_check_fraud_history_chevron",
-                        "type": "Text",
-                        "props": {
-                          "text": "›",
-                          "size": 20,
-                          "color": "#9E9E9E"
-                        }
-                      }
-                    ]
+                    "props": {
+                      "imageUrl": "https://images.pexels.com/photos/1149137/pexels-photo-1149137.jpeg",
+                      "imageSize": 48,
+                      "title": "Vehicle history report",
+                      "subtitle": "Service records and Accidental check",
+                      "trailing": "chevron"
+                    }
                   },
                   {
                     "id": "car_check_fraud_odometer",
-                    "type": "Row",
+                    "type": "ListRow",
                     "style": {
                       "padding": [
                         12,
@@ -6247,80 +6179,19 @@
                         4,
                         16,
                         4
-                      ],
-                      "justifyContent": "spaceBetween",
-                      "alignItems": "center"
+                      ]
                     },
-                    "props": {},
-                    "children": [
-                      {
-                        "id": "car_check_fraud_odometer_left",
-                        "type": "Row",
-                        "style": {
-                          "width": "wrap",
-                          "alignItems": "center"
-                        },
-                        "props": {},
-                        "children": [
-                          {
-                            "id": "car_check_fraud_odometer_img",
-                            "type": "Image",
-                            "props": {
-                              "url": "https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg",
-                              "width": 48,
-                              "height": 48
-                            }
-                          },
-                          {
-                            "id": "car_check_fraud_odometer_text_col",
-                            "type": "Column",
-                            "style": {
-                              "padding": [
-                                12,
-                                0,
-                                0,
-                                0
-                              ]
-                            },
-                            "props": {},
-                            "children": [
-                              {
-                                "id": "car_check_fraud_odometer_title",
-                                "type": "Text",
-                                "props": {
-                                  "text": "Odometer fraud check",
-                                  "size": 14,
-                                  "weight": "bold"
-                                }
-                              },
-                              {
-                                "id": "car_check_fraud_odometer_subtitle",
-                                "type": "Text",
-                                "props": {
-                                  "text": "20% cars show odometer fraud",
-                                  "size": 12,
-                                  "color": "#5B5B7A",
-                                  "maxLines": 2
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "id": "car_check_fraud_odometer_chevron",
-                        "type": "Text",
-                        "props": {
-                          "text": "›",
-                          "size": 20,
-                          "color": "#9E9E9E"
-                        }
-                      }
-                    ]
+                    "props": {
+                      "imageUrl": "https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg",
+                      "imageSize": 48,
+                      "title": "Odometer fraud check",
+                      "subtitle": "20% cars show odometer fraud",
+                      "trailing": "chevron"
+                    }
                   },
                   {
                     "id": "car_check_fraud_rto",
-                    "type": "Row",
+                    "type": "ListRow",
                     "style": {
                       "padding": [
                         12,
@@ -6336,76 +6207,15 @@
                         4,
                         16,
                         4
-                      ],
-                      "justifyContent": "spaceBetween",
-                      "alignItems": "center"
+                      ]
                     },
-                    "props": {},
-                    "children": [
-                      {
-                        "id": "car_check_fraud_rto_left",
-                        "type": "Row",
-                        "style": {
-                          "width": "wrap",
-                          "alignItems": "center"
-                        },
-                        "props": {},
-                        "children": [
-                          {
-                            "id": "car_check_fraud_rto_img",
-                            "type": "Image",
-                            "props": {
-                              "url": "https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg",
-                              "width": 48,
-                              "height": 48
-                            }
-                          },
-                          {
-                            "id": "car_check_fraud_rto_text_col",
-                            "type": "Column",
-                            "style": {
-                              "padding": [
-                                12,
-                                0,
-                                0,
-                                0
-                              ]
-                            },
-                            "props": {},
-                            "children": [
-                              {
-                                "id": "car_check_fraud_rto_title",
-                                "type": "Text",
-                                "props": {
-                                  "text": "RTO check",
-                                  "size": 14,
-                                  "weight": "bold"
-                                }
-                              },
-                              {
-                                "id": "car_check_fraud_rto_subtitle",
-                                "type": "Text",
-                                "props": {
-                                  "text": "15% cars have RC mismatches",
-                                  "size": 12,
-                                  "color": "#5B5B7A",
-                                  "maxLines": 2
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "id": "car_check_fraud_rto_chevron",
-                        "type": "Text",
-                        "props": {
-                          "text": "›",
-                          "size": 20,
-                          "color": "#9E9E9E"
-                        }
-                      }
-                    ]
+                    "props": {
+                      "imageUrl": "https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg",
+                      "imageSize": 48,
+                      "title": "RTO check",
+                      "subtitle": "15% cars have RC mismatches",
+                      "trailing": "chevron"
+                    }
                   }
                 ]
               },
@@ -6639,7 +6449,7 @@
                     "id": "car_check_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -7066,7 +6876,7 @@
                     "id": "insurance_footer_tag",
                     "type": "Text",
                     "props": {
-                      "text": "Made with ❤️ in Gurugram",
+                      "text": "Made with ❤️ by Hardik",
                       "size": 15,
                       "color": "#FFFFFF"
                     }
@@ -7220,7 +7030,7 @@
             "iconBoxBorderColor": "#D8D5F5",
             "labelSize": 14,
             "defaultSelected": "all",
-            "_note": "Confirmed on-device: the search bar + this tab row stay pinned while the body scrolls (the location row above scrolls away). Not replicated here — no sticky/pinned-region concept in the schema yet, same gap COVERAGE.md already flags.",
+            "_note": "Confirmed on-device: the search bar + this tab row stay pinned while the body scrolls, for the whole page, not just during the collapse transition (the location row above is what scrolls away). This works for free because the header renders in its own Column above the body LazyColumn rather than inside it — no dedicated sticky/pinned-region mechanism needed for a top header. COVERAGE.md's one remaining pinned-region gap is a bottom sticky action bar, which is a different case (that content lives inside the scrolling body).",
             "items": [
               {
                 "id": "all",
