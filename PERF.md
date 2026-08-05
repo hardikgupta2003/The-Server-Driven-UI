@@ -349,6 +349,30 @@ smaller contributors):
    "Slow bitmap uploads" in both builds, so Coil decode/upload is not a
    scroll-jank contributor at least on this device/payload.)
 
+### A methodology gap found after the fact, not re-measured yet
+
+While auditing the codebase for consistency (unrelated to a specific perf
+complaint), `StaticLandingScreen.kt`'s `reportFullyDrawn()`/`PerfTrace.mark`
+call was found attached to the *inner* body `LazyColumn`'s own modifier,
+while `MainActivity.kt`'s equivalent call is attached to the `modifier`
+passed into `SduiPage(...)` — which, because `landing_page.json` defines a
+`header`, `SduiPage` applies to the *outer* `Column` wrapping header + body,
+not the inner list (see `SduiRenderer.kt`'s `SduiPage` branching). That means
+the two variants' `Fully drawn` timestamps were not firing at strictly the
+same structural point: the SDUI version's marker included the header's
+first layout pass, the static version's did not. Fixed by moving the static
+marker to the outer `Column`, matching the SDUI path exactly.
+
+**This was not re-measured before writing this note.** The physical-device
+numbers above (TTR 875ms static / 1243ms SDUI, +42.1% overhead) were
+captured *before* this fix, so they carry a small, currently-unquantified
+asymmetry — the static number likely undercounts its own header's
+first-frame cost slightly relative to the SDUI number. Given the header is
+a small, fast-to-compose region (a location row + search bar + nav chips,
+no network images), this is expected to be a minor correction, not one that
+flips the conclusion — but "expected to be minor" is a claim, not a
+measurement, and should be re-run before citing these numbers as final.
+
 ## Trade-offs
 
 - `isMinifyEnabled = false` currently — release-mode R8/ProGuard shrinking

@@ -28,8 +28,7 @@
                 },
                 "props": {
                   "title": "Buy car",
-                  "badge": "Up to ₹80,000 off",
-                  "_note": "badge is a trailing pill next to the title in the real app — CarouselRail only renders a plain title today, prop is ignored for now."
+                  "titleBadgeLabel": "Up to ₹80,000 off"
                 },
                 "children": [
                   {
@@ -529,8 +528,7 @@
                 },
                 "props": {
                   "title": "Car check services",
-                  "columns": 3,
-                  "rows": 2
+                  "columns": 3
                 },
                 "children": [
                   {
@@ -806,8 +804,8 @@
                 },
                 "props": {
                   "title": "Used cars you'll love",
-                  "viewAllLabel": "View all",
-                  "_note": "viewAllLabel is a trailing header link in the real app — ignored today, CarouselRail only renders the plain title. CarCard props below (emi/trustBadges/wishlistable/ownedStock) are also ahead of what CarCard currently renders — kept in the payload anyway as a forward-compatibility demo per SCHEMA.md's versioning story: when CarCard is enhanced to read them, this JSON won't need to change."
+                  "trailingActionLabel": "View all",
+                  "_note": "CarCard props below (emi/trustBadges/wishlistable/ownedStock) are ahead of what CarCard currently renders — kept in the payload anyway as a forward-compatibility demo per SCHEMA.md's versioning story: when CarCard is enhanced to read them, this JSON won't need to change."
                 },
                 "children": [
                   {
@@ -914,7 +912,15 @@
                       }
                     }
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "used_cars_youll_love_view_all"
+                    }
+                  }
+                }
               },
               {
                 "id": "chip_row_body_type_demo",
@@ -979,7 +985,8 @@
                           "title": "Hyundai Creta SX 2021",
                           "subtitle": "32,400 km · Petrol · Automatic",
                           "price": "₹13.75 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -999,7 +1006,8 @@
                           "title": "Kia Seltos HTX 2020",
                           "subtitle": "41,200 km · Diesel · Manual",
                           "price": "₹12.10 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -1040,7 +1048,8 @@
                           "title": "Honda City ZX 2021",
                           "subtitle": "27,600 km · Petrol · Automatic",
                           "price": "₹12.90 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -1079,7 +1088,8 @@
                           "title": "Skoda Slavia Style 2022",
                           "subtitle": "14,200 km · Petrol · Automatic",
                           "price": "₹14.25 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -1101,7 +1111,8 @@
                           "title": "Maruti Suzuki Swift VXI 2021",
                           "subtitle": "24,800 km · Petrol · Manual",
                           "price": "₹6.45 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -1121,7 +1132,8 @@
                           "title": "Hyundai i20 Sportz 2022",
                           "subtitle": "16,500 km · Petrol · Manual",
                           "price": "₹7.90 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -1162,7 +1174,8 @@
                           "title": "Maruti Suzuki Ertiga ZXI 2021",
                           "subtitle": "29,400 km · Petrol · Manual",
                           "price": "₹9.35 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -1201,7 +1214,8 @@
                           "title": "Kia Carens Luxury Plus 2022",
                           "subtitle": "12,700 km · Diesel · Automatic",
                           "price": "₹15.60 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -1414,7 +1428,7 @@
                 "type": "LiveAuctionWidget",
                 "minClientVersion": 7,
                 "props": {
-                  "note": "Deliberately unrecognized type — proves the unknown-component fallback: this section is skipped without breaking the rest of the page."
+                  "_note": "Deliberately unrecognized type — proves the unknown-component fallback: this section is skipped without breaking the rest of the page."
                 }
               },
               {
@@ -1431,10 +1445,8 @@
                 },
                 "props": {
                   "title": "Manage your vehicle",
-                  "addVehicleLabel": "+ Add vehicle",
-                  "columns": 3,
-                  "rows": 2,
-                  "_note": "addVehicleLabel is a trailing header link in the real app — ignored today, Grid only renders the plain title."
+                  "trailingActionLabel": "+ Add vehicle",
+                  "columns": 3
                 },
                 "children": [
                   {
@@ -1695,7 +1707,15 @@
                       }
                     ]
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "manage_your_vehicle_add"
+                    }
+                  }
+                }
               },
               {
                 "id": "spotify_banner",
@@ -2003,7 +2023,7 @@
                 },
                 "props": {
                   "title": "Trending new cars",
-                  "viewAllLabel": "View all",
+                  "trailingActionLabel": "View all",
                   "_note": "Real app shows a large rank-number watermark (1/2/3) behind each card, not a small badge — CarCard's badge prop is used here as a stand-in, not a true rank watermark."
                 },
                 "children": [
@@ -2083,7 +2103,15 @@
                       }
                     }
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "trending_new_cars_view_all"
+                    }
+                  }
+                }
               },
               {
                 "id": "recommended_match_card",
@@ -2220,6 +2248,18 @@
                       "title": "200+ point inspection\nIndia's largest car inspection network",
                       "background": "#00695C",
                       "route": "inspection_network"
+                    },
+                    {
+                      "id": "promo_return_guarantee2",
+                      "title": "30 DAY RETURN GUARANTEE\nWe take it back as easily as we deliver it",
+                      "background": "#1565C0",
+                      "route": "return_policy"
+                    },
+                    {
+                      "id": "promo_return_guarantee3",
+                      "title": "30 DAY RETURN GUARANTEE\nWe take it back as easily as we deliver it",
+                      "background": "#1565C0",
+                      "route": "return_policy"
                     }
                   ]
                 }
@@ -2303,8 +2343,7 @@
                 },
                 "props": {
                   "title": "Buy car",
-                  "badge": "Up to ₹80,000 off",
-                  "_note": "badge is a trailing pill next to the title in the real app — CarouselRail only renders a plain title today, prop is ignored for now."
+                  "titleBadgeLabel": "Up to ₹80,000 off"
                 },
                 "children": [
                   {
@@ -2804,8 +2843,7 @@
                 },
                 "props": {
                   "title": "Car check services",
-                  "columns": 3,
-                  "rows": 2
+                  "columns": 3
                 },
                 "children": [
                   {
@@ -3081,8 +3119,8 @@
                 },
                 "props": {
                   "title": "Used cars you'll love",
-                  "viewAllLabel": "View all",
-                  "_note": "viewAllLabel is a trailing header link in the real app — ignored today, CarouselRail only renders the plain title. CarCard props below (emi/trustBadges/wishlistable/ownedStock) are also ahead of what CarCard currently renders — kept in the payload anyway as a forward-compatibility demo per SCHEMA.md's versioning story: when CarCard is enhanced to read them, this JSON won't need to change."
+                  "trailingActionLabel": "View all",
+                  "_note": "CarCard props below (emi/trustBadges/wishlistable/ownedStock) are ahead of what CarCard currently renders — kept in the payload anyway as a forward-compatibility demo per SCHEMA.md's versioning story: when CarCard is enhanced to read them, this JSON won't need to change."
                 },
                 "children": [
                   {
@@ -3189,7 +3227,15 @@
                       }
                     }
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "used_cars_youll_love_view_all"
+                    }
+                  }
+                }
               },
               {
                 "id": "chip_row_body_type_demo__default",
@@ -3254,7 +3300,8 @@
                           "title": "Hyundai Creta SX 2021",
                           "subtitle": "32,400 km · Petrol · Automatic",
                           "price": "₹13.75 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -3274,7 +3321,8 @@
                           "title": "Kia Seltos HTX 2020",
                           "subtitle": "41,200 km · Diesel · Manual",
                           "price": "₹12.10 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -3315,7 +3363,8 @@
                           "title": "Honda City ZX 2021",
                           "subtitle": "27,600 km · Petrol · Automatic",
                           "price": "₹12.90 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -3354,7 +3403,8 @@
                           "title": "Skoda Slavia Style 2022",
                           "subtitle": "14,200 km · Petrol · Automatic",
                           "price": "₹14.25 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -3376,7 +3426,8 @@
                           "title": "Maruti Suzuki Swift VXI 2021",
                           "subtitle": "24,800 km · Petrol · Manual",
                           "price": "₹6.45 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -3396,7 +3447,8 @@
                           "title": "Hyundai i20 Sportz 2022",
                           "subtitle": "16,500 km · Petrol · Manual",
                           "price": "₹7.90 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -3437,7 +3489,8 @@
                           "title": "Maruti Suzuki Ertiga ZXI 2021",
                           "subtitle": "29,400 km · Petrol · Manual",
                           "price": "₹9.35 Lakh",
-                          "badge": "Assured"
+                          "badge": "Assured",
+                          "badgeColor": "#1565C0"
                         },
                         "actions": {
                           "onClick": {
@@ -3476,7 +3529,8 @@
                           "title": "Kia Carens Luxury Plus 2022",
                           "subtitle": "12,700 km · Diesel · Automatic",
                           "price": "₹15.60 Lakh",
-                          "badge": "New arrival"
+                          "badge": "New arrival",
+                          "badgeColor": "#F57C00"
                         },
                         "actions": {
                           "onClick": {
@@ -3689,7 +3743,7 @@
                 "type": "LiveAuctionWidget",
                 "minClientVersion": 7,
                 "props": {
-                  "note": "Deliberately unrecognized type — proves the unknown-component fallback: this section is skipped without breaking the rest of the page."
+                  "_note": "Deliberately unrecognized type — proves the unknown-component fallback: this section is skipped without breaking the rest of the page."
                 }
               },
               {
@@ -3706,10 +3760,8 @@
                 },
                 "props": {
                   "title": "Manage your vehicle",
-                  "addVehicleLabel": "+ Add vehicle",
-                  "columns": 3,
-                  "rows": 2,
-                  "_note": "addVehicleLabel is a trailing header link in the real app — ignored today, Grid only renders the plain title."
+                  "trailingActionLabel": "+ Add vehicle",
+                  "columns": 3
                 },
                 "children": [
                   {
@@ -3970,7 +4022,15 @@
                       }
                     ]
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "manage_your_vehicle_add"
+                    }
+                  }
+                }
               },
               {
                 "id": "spotify_banner__default",
@@ -4278,7 +4338,7 @@
                 },
                 "props": {
                   "title": "Trending new cars",
-                  "viewAllLabel": "View all",
+                  "trailingActionLabel": "View all",
                   "_note": "Real app shows a large rank-number watermark (1/2/3) behind each card, not a small badge — CarCard's badge prop is used here as a stand-in, not a true rank watermark."
                 },
                 "children": [
@@ -4358,7 +4418,15 @@
                       }
                     }
                   }
-                ]
+                ],
+                "actions": {
+                  "onTrailingAction": {
+                    "type": "navigate",
+                    "payload": {
+                      "route": "trending_new_cars_view_all"
+                    }
+                  }
+                }
               },
               {
                 "id": "recommended_match_card__default",
@@ -4595,8 +4663,7 @@
                   ]
                 },
                 "props": {
-                  "columns": 2,
-                  "rows": 2
+                  "columns": 2
                 },
                 "children": [
                   {
@@ -5278,8 +5345,7 @@
                   ]
                 },
                 "props": {
-                  "columns": 2,
-                  "rows": 2
+                  "columns": 2
                 },
                 "children": [
                   {
@@ -6488,8 +6554,7 @@
                   ]
                 },
                 "props": {
-                  "columns": 2,
-                  "rows": 2
+                  "columns": 2
                 },
                 "children": [
                   {
@@ -6983,21 +7048,14 @@
               "id": "search_header",
               "type": "SearchHeader",
               "style": {
-                "background": "#392BCB"
+                "height": 52
               },
               "props": {
                 "placeholder": "Search Buy Used Cars",
+                "stateKey": "searchQuery",
                 "backgroundColor": "#4E42D8",
                 "borderColor": "#D8D5F5",
                 "hintColor": "#D8D5F5"
-              },
-              "actions": {
-                "onClick": {
-                  "type": "navigate",
-                  "payload": {
-                    "route": "search"
-                  }
-                }
               }
             }
           ],

@@ -307,7 +307,21 @@ fun StaticLandingScreen(modifier: Modifier = Modifier) {
         Toast.makeText(context, "navigate → $route", Toast.LENGTH_SHORT).show()
     }
 
-    Column(modifier = modifier) {
+    // Perf marker sits on this outer Column — the same header+body wrapper
+    // `SduiPage` applies its own `modifier` (and this same callback) to
+    // whenever the JSON page defines a `header`, which `landing_page.json`
+    // does — so both variants report "fully drawn" at the same structural
+    // point (header + first body frame positioned), not one measuring a
+    // narrower region than the other. See `MainActivity.kt`/`SduiRenderer.kt`.
+    Column(
+        modifier = modifier.onGloballyPositioned {
+            if (!firstFrameReported) {
+                firstFrameReported = true
+                PerfTrace.mark("static_first_frame_positioned")
+                (context as? Activity)?.reportFullyDrawn()
+            }
+        },
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
                 if (maxHeaderHeightPx.value == 0f) maxHeaderHeightPx.value = coordinates.size.height.toFloat()
@@ -323,14 +337,7 @@ fun StaticLandingScreen(modifier: Modifier = Modifier) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(nestedScrollConnection)
-                .onGloballyPositioned {
-                    if (!firstFrameReported) {
-                        firstFrameReported = true
-                        PerfTrace.mark("static_first_frame_positioned")
-                        (context as? Activity)?.reportFullyDrawn()
-                    }
-                },
+                .nestedScroll(nestedScrollConnection),
         ) {
             when (selectedTab) {
                 "buy" -> buyTabContent(onNavigate)

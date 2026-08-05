@@ -6,8 +6,8 @@
 |---|---|---|---|
 | `Column` | Layout primitive | — (uses `children`) | Generic vertical stack |
 | `Row` | Layout primitive | — (uses `children`) | Generic horizontal stack |
-| `Grid` | Layout primitive | `columns` (Int), `title` | Fixed-column `LazyVerticalGrid`, nested inside a scrolling `LazyColumn`; height and `userScrollEnabled = false` are derived from the actual child count (not a `rows` prop) so it can never become its own independently-scrollable region |
-| `CarouselRail` | Layout primitive | `title` | Horizontally scrolling `LazyRow`; identical mechanism whether children are `CarCard`s or banners |
+| `Grid` | Layout primitive | `columns` (Int), `title`, `titleBadgeLabel`, `trailingActionLabel` | Plain `Row`s chunked by `columns` inside a `Column` — deliberately not a `LazyVerticalGrid`: this grid already sets `userScrollEnabled`-equivalent behavior (nothing scrolls independently of the outer page), so it wraps its own real content instead of guessing a fixed pixel height, and works unchanged for any row count |
+| `CarouselRail` | Layout primitive | `title`, `titleBadgeLabel`, `trailingActionLabel` | Horizontally scrolling `LazyRow`; identical mechanism whether children are `CarCard`s or banners |
 | `Text` | Leaf | `text`, `size`, `weight` (`bold`/`medium`/normal), `color` (hex) | |
 | `Image` | Leaf | `url`, `width`, `height`, `alt` | Missing/failed `url` renders a stable gray placeholder, never a layout hole |
 | `Spacer` | Leaf | `height` | |
@@ -16,10 +16,10 @@
 | `ChipRow` | Interactive leaf | `items[]` (`id`,`label`,`value`), `defaultSelected` | Fires `onSelect`; selection writes to state via `payloadFromEvent: "value"` |
 | `TextField` | Interactive leaf | `stateKey`, `placeholder`, `label`, `singleLine`, `borderColor` | Real editable input (not decorative) — value lives in `SduiStateStore` under `stateKey`, every keystroke dispatches `updateState` through the same `ActionDispatcher` path any other interactive component uses. No `fillMaxWidth()` default (see kdoc) since it commonly sits next to a fixed-width sibling. |
 | `Chip` | Composite | `label`, `textColor`, `weight`, `size` | Small pill/badge, sized to its own content (no default width/background — `style` controls appearance entirely, like `Button`) |
-| `ListRow` | Composite | `imageUrl`, `imageSize`, `title`, `subtitle`, `subtitleColor`, `trailing` (`"chevron"` or arbitrary text) | Generalizes the "image + title/subtitle + trailing accessory" pattern that used to be ~40 lines of hand-composed `Row`/`Column`/`Text` per instance |
-| `CarCard` | Composite | `imageUrl`, `title`, `subtitle`, `price`, `badge` | Fires `onClick` |
-| `BannerCarousel` | Composite | `items[]` (`imageUrl`\|`background`, `title`, `route`) | Real center-focused carousel — the visible/center item renders at full scale, neighbors shrink with distance from center, and releasing a swipe snaps to the nearest item (`rememberSnapFlingBehavior`) rather than settling on momentum alone |
-| `SearchHeader` | Composite | `title`, `placeholder` | Fires `onClick` |
+| `ListRow` | Composite | `imageUrl`, `imageSize`, `title`, `subtitle`, `subtitleColor`, `trailing` (`"chevron"` or arbitrary text), `trailingColor` | Generalizes the "image + title/subtitle + trailing accessory" pattern that used to be ~40 lines of hand-composed `Row`/`Column`/`Text` per instance |
+| `CarCard` | Composite | `imageUrl`, `imageHeight`, `title`, `subtitle`, `subtitleColor`, `price`, `badge`, `badgeColor` | Fires `onClick`. `badgeColor` matters once a page has more than one badge meaning ("Assured" vs "New arrival" vs "Cars24 Owned stock") — a single hardcoded badge color couldn't tell them apart |
+| `BannerCarousel` | Composite | `items[]` (`imageUrl`\|`background`, `title`, `route`), `itemWidth`, `itemHeight` | Real center-focused carousel — the visible/center item renders at full scale, neighbors shrink with distance from center, and releasing a swipe snaps to the nearest item (`rememberSnapFlingBehavior`) rather than settling on momentum alone |
+| `SearchHeader` | Composite | `title`, `placeholder`, `stateKey` | Real typable input bound to `SduiStateStore` via `stateKey` — same `updateState` action path as `TextField`, not a decorative read-only field |
 | `ValuePropStrip` | Composite | `items[]` (`icon`, `label`) | Static trust-badge row |
 | `FooterCta` | Composite | `title`, `subtitle`, `buttonLabel`, `background` | Fires `onClick` |
 | *(unrecognized type)* | Fallback | — | `UnknownComponent` — logs once, renders nothing in release / a debug-only red outline chip, never crashes |
@@ -28,6 +28,7 @@
 - `style` (padding/margin/background/cornerRadius) — never reimplemented per component
 - `actions` — any node can carry `onClick`/`onSelect`/etc., interpreted generically by `ActionDispatcher`
 - `dataBinding` — swaps a node's `children` based on a shared state key. Used for the category-chip → rail filter *and*, completely unmodified, for the tenure-selector → EMI text in the bottom sheet. One mechanism, two unrelated UI patterns — this reuse is the main coverage lever, not the size of the registry.
+- `SectionTitle`'s badge/trailing-action slot — `titleBadgeLabel` (a pill next to the title) and `trailingActionLabel`/`onTrailingAction` (a tappable link at the row's end) render identically on `CarouselRail` and `Grid`, the two component types with a `title`. Both used to be dead, component-specific props (`CarouselRail.badge`, `Grid.addVehicleLabel`) declared in the JSON but never rendered — replaced with one shared mechanism instead of wiring each up separately.
 
 ## What the schema can express today
 
@@ -45,6 +46,8 @@
 - **Expand/collapse (accordion) content.** No component holds open/closed UI state tied to a toggle action.
 
 **Closed since the last pass**: a dedicated `Chip`/`ListRow` component (see registry table above) now replaces the hand-composed `Row`/`Column` pattern that caused a real layout bug (`AI_WORKFLOW.md`'s third story — a nested container defaulting to `fillMaxWidth()` starved its sibling of space). `landing_page.json`'s challan country-code chip and all three "uncover frauds" rows have been migrated to the new components — each fraud row went from ~40 lines of primitives to ~10 lines of `ListRow` props, and the bug class is now structurally impossible for new instances of this pattern, not just patched at the two sites it was first found.
+
+**Closed in this pass**: three component-specific, declared-but-never-rendered props (`CarouselRail.badge`, `Grid.addVehicleLabel`, `CarouselRail.viewAllLabel`) are now wired up under two generic, reusable names (`titleBadgeLabel`, `trailingActionLabel`/`onTrailingAction`) instead of staying as dead schema surface. `SearchHeader` went from a decorative `readOnly` field (tapped to navigate to a search screen that doesn't exist in this build) to an actually-typable field bound to `SduiStateStore` via `stateKey`, same as `TextField`. `Grid` no longer estimates its own height from a guessed per-cell dp constant — it wraps real measured content via plain chunked `Row`s, so it's now correct for any row count without per-instance tuning.
 
 ## Honest coverage claim
 

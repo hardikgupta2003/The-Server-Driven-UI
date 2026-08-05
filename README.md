@@ -153,6 +153,38 @@ them is not.
   in `COVERAGE.md` as a scoped-out improvement rather than silently
   deferred.
 
+## Future scope
+
+- **Compose Multiplatform as the path to a second platform**, rather than a
+  Swift/RN rewrite. The renderer is plain Jetpack Compose with no
+  Android-only APIs in the schema-resolution path itself, and the model
+  layer is `kotlinx.serialization`, which is multiplatform-supported
+  out of the box — so `SduiNode`/`SduiStyle`/`PageContent` and the parsing
+  step need no changes to run on iOS. SDUI as a pattern is not
+  Android-specific, so a Compose Multiplatform port would mean one shared
+  Kotlin codebase (schema, renderer, `ActionDispatcher`, `SduiStateStore`)
+  driving both platforms, with the platform-specific surface limited to
+  things like image loading (Coil's multiplatform artifact) and native
+  host/navigation wiring. Not attempted in this timebox — noted here as
+  the credible next step rather than left unaddressed.
+- **Finer-grained state observation than the current flat `Map<String,
+  String>`.** Today, `SduiStateStore` exposes one `MutableStateFlow<Map<String,
+  String>>`, collected once at the page root (`SduiPage`) and passed down
+  as a plain parameter through every `RenderNode` call (see
+  `SduiRenderer.kt`). Compose is smart about skipping recomposition when it
+  can prove a composable's inputs are unchanged — but a plain `Map` isn't
+  `@Stable`/`@Immutable` to the compiler, and its content does change on
+  every write, so a write to *any* key (e.g. a keystroke in the EMI
+  calculator's tenure sheet) currently recomposes every node reading
+  `currentState`, not just the ones actually bound to that key. Fine at this
+  page's size (confirmed: 0.40% dropped frames on physical hardware, see
+  `PERF.md`), but the identified fix if a future page gets much larger is to
+  replace the `StateFlow<Map>` with a Compose `SnapshotStateMap`
+  (`mutableStateMapOf<String, String>()`) and read `map[key]` at the point
+  of use inside each component instead of resolving the whole map once at
+  the root — Compose's snapshot system then scopes recomposition per key
+  read, not per map write.
+
 ## Docs map
 
 - [`SCHEMA.md`](SCHEMA.md) — the JSON contract and why it's shaped this way

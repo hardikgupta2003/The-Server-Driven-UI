@@ -25,6 +25,15 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // No dedicated release keystore for this project — it's not
+            // shipping to the Play Store, and PERF.md's release-build
+            // measurements need a release APK that's actually installable
+            // via `installRelease`/Android Studio's Run button, not just
+            // buildable. Signing with the auto-generated debug keystore
+            // (present on any machine that's run the Android SDK once)
+            // makes that work out of the box; swap in a real signing
+            // config before any real distribution.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

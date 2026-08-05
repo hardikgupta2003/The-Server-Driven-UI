@@ -1,6 +1,7 @@
 package com.hardik.the_server_driven_ui.sdui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,15 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
@@ -37,8 +37,6 @@ import com.hardik.the_server_driven_ui.sdui.renderer.LocalSduiCollapseFraction
 import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
 import com.hardik.the_server_driven_ui.sdui.renderer.toModifier
-import kotlin.math.ceil
-import kotlin.math.max
 
 /**
  * `props.collapseBehavior = "hide"` opts any node into shrinking away as
@@ -152,8 +150,16 @@ val rowComponent: SduiComponent = { node, context ->
 
 /** Horizontally scrolling rail — used for banner carousels and car-card rails alike. */
 val carouselRailComponent: SduiComponent = { node, context ->
+    val trailingAction = node.actions["onTrailingAction"]
     Column(modifier = node.style.toModifier()) {
-        node.props.str("title")?.let { title -> SectionTitle(title) }
+        node.props.str("title")?.let { title ->
+            SectionTitle(
+                title = title,
+                badgeLabel = node.props.str("titleBadgeLabel"),
+                trailingLabel = node.props.str("trailingActionLabel"),
+                onTrailingClick = trailingAction?.let { action -> { context.dispatch(action, null) } },
+            )
+        }
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -167,29 +173,56 @@ val carouselRailComponent: SduiComponent = { node, context ->
 
 /**
  * Fixed-column vertical grid, e.g. category tiles or a car-card grid.
- * Height is sized from the actual child count, not the payload's `rows`
- * hint — trusting `rows` there would undersize the box whenever a future
- * payload adds more children than `rows * columns` declares, turning this
- * grid into its own independently-scrollable region nested inside the
- * page's outer vertical list (a same-direction nested-scroll conflict).
- * `userScrollEnabled = false` closes that off entirely: the grid never
- * scrolls itself, only the outer list does.
+ *
+ * Deliberately NOT a `LazyVerticalGrid`: laziness is only worth paying for
+ * when items scroll into view on demand, but this grid already sets
+ * `userScrollEnabled = false` (so it never becomes its own independently-
+ * scrollable region nested inside the page's outer `LazyColumn` — a
+ * same-direction nested-scroll conflict) — meaning every child composes
+ * regardless. A lazy grid with laziness turned off still demands a fixed
+ * pixel height up front (it can't measure "wrap content" without knowing
+ * an item's size ahead of scrolling to it), which is what forced an
+ * earlier version of this component to guess a per-cell height in dp and
+ * multiply by row count — a guess that was wrong for every cell whose
+ * real content (icon size, 1 vs 2 lines of label, a subtitle) didn't
+ * match whatever cell the constant was tuned against, and would need a
+ * new guess every time row/column count changed.
+ *
+ * Chunking children into plain `Row`s inside a `Column` sidesteps the
+ * problem entirely: normal (non-lazy) layout measures each row's actual
+ * content and wraps to it, so this scales to any row count, any column
+ * count, any cell content, with no per-instance tuning.
  */
 val gridComponent: SduiComponent = { node, context ->
     val columns = node.props.intOr("columns", 2).coerceAtLeast(1)
-    val rowCount = ceil(node.children.size / columns.toFloat()).toInt().coerceAtLeast(1)
+    val trailingAction = node.actions["onTrailingAction"]
     Column(modifier = node.style.toModifier()) {
-        node.props.str("title")?.let { title -> SectionTitle(title) }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(columns),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        node.props.str("title")?.let { title ->
+            SectionTitle(
+                title = title,
+                badgeLabel = node.props.str("titleBadgeLabel"),
+                trailingLabel = node.props.str("trailingActionLabel"),
+                onTrailingClick = trailingAction?.let { action -> { context.dispatch(action, null) } },
+            )
+        }
+        Column(
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(16.dp),
-            userScrollEnabled = false,
-            modifier = Modifier.height((rowCount * 220).dp),
         ) {
-            gridItems(node.children, key = { it.id }) { child ->
-                context.renderChild(child)
+            node.children.chunked(columns).forEach { rowItems ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    rowItems.forEach { child ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            context.renderChild(child)
+                        }
+                    }
+                    // Last row may have fewer items than `columns` — pad
+                    // with empty weighted space so those cells keep their
+                    // intended column width instead of stretching wider.
+                    repeat(columns - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -248,12 +281,57 @@ val dividerComponent: SduiComponent = { node, _ ->
     Divider(modifier = node.style.toModifier())
 }
 
+/**
+ * A section's title row — shared by every component with a `title` prop
+ * (`CarouselRail`, `Grid`, ...), not reimplemented per component. The
+ * trailing slot (label + tap action) is generic on purpose: it used to be
+ * component-specific dead props (`CarouselRail.viewAllLabel`, `Grid.
+ * addVehicleLabel`) that were declared in the schema but never rendered —
+ * one `trailingActionLabel`/`onTrailingAction` pair here covers "View all"
+ * on a rail and "+ Add vehicle" on a grid identically, and any future
+ * section with a header link needs no new client code, just these two
+ * existing keys.
+ */
 @Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    )
+fun SectionTitle(
+    title: String,
+    badgeLabel: String? = null,
+    trailingLabel: String? = null,
+    onTrailingClick: (() -> Unit)? = null,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            badgeLabel?.let {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
+                )
+            }
+        }
+        trailingLabel?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = onTrailingClick?.let { onClick -> Modifier.clickable { onClick() } } ?: Modifier,
+            )
+        }
+    }
 }

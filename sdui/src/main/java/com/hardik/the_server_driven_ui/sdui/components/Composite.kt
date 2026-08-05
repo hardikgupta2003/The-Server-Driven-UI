@@ -1,9 +1,12 @@
 package com.hardik.the_server_driven_ui.sdui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,17 +18,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
@@ -41,14 +47,22 @@ import com.hardik.the_server_driven_ui.sdui.renderer.SduiComponent
 import com.hardik.the_server_driven_ui.sdui.renderer.parseHexColor
 import com.hardik.the_server_driven_ui.sdui.renderer.toModifier
 import kotlinx.serialization.json.JsonPrimitive
+import kotlin.math.abs
 
 /** A single car listing: image, title, subtitle, price, tappable for a nav intent. */
 val carCardComponent: SduiComponent = { node, context ->
     val imageUrl = node.props.str("imageUrl")
     val title = node.props.strOrEmpty("title")
     val subtitle = node.props.str("subtitle")
+    val subtitleColor = node.props.str("subtitleColor")?.let { parseHexColor(it) } ?: Color.Gray
     val price = node.props.str("price")
     val badge = node.props.str("badge")
+    // Was a fixed green for every badge regardless of text — "Assured",
+    // "New arrival", and "Cars24 Owned stock" all read as the same status
+    // in the real app, not identical badges, so the color needs to be a
+    // per-node override, not a constant this component owns.
+    val badgeColor = node.props.str("badgeColor")?.let { parseHexColor(it) } ?: Color(0xFF00A86B)
+    val imageHeight = node.props.intOr("imageHeight", 110).dp
     val onClick = node.actions["onClick"]
 
     Card(
@@ -57,11 +71,11 @@ val carCardComponent: SduiComponent = { node, context ->
         },
     ) {
         Column {
-            Box(modifier = Modifier.fillMaxWidth().height(110.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().height(imageHeight)) {
                 if (imageUrl != null) {
-                    AsyncImage(model = imageUrl, contentDescription = title, modifier = Modifier.fillMaxWidth().height(110.dp))
+                    AsyncImage(model = imageUrl, contentDescription = title, modifier = Modifier.fillMaxWidth().height(imageHeight))
                 } else {
-                    Box(modifier = Modifier.fillMaxWidth().height(110.dp).background(Color(0xFFE0E0E0)))
+                    Box(modifier = Modifier.fillMaxWidth().height(imageHeight).background(Color(0xFFE0E0E0)))
                 }
                 badge?.let {
                     Text(
@@ -70,7 +84,7 @@ val carCardComponent: SduiComponent = { node, context ->
                         modifier = Modifier
                             .padding(6.dp)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFF00A86B))
+                            .background(badgeColor)
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                         style = MaterialTheme.typography.labelSmall,
                     )
@@ -78,7 +92,7 @@ val carCardComponent: SduiComponent = { node, context ->
             }
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(title, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = Color.Gray, maxLines = 1) }
+                subtitle?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = subtitleColor, maxLines = 1) }
                 price?.let { Text(it, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium) }
             }
         }
@@ -99,13 +113,14 @@ val carCardComponent: SduiComponent = { node, context ->
  * layout/draw-phase lambda makes this remeasure/redraw-only instead of a
  * recomposition of every visible banner on every scroll pixel.
  */
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 val bannerCarouselComponent: SduiComponent = { node, context ->
     val banners = node.props.objList("items")
-    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-    val flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(listState)
-    androidx.compose.foundation.layout.BoxWithConstraints(modifier = node.style.toModifier()) {
-        val itemWidth = 280.dp
+    val itemWidth = node.props.intOr("itemWidth", 280).dp
+    val itemHeight = node.props.intOr("itemHeight", 120).dp
+    val listState = rememberLazyListState()
+    val flingBehavior = rememberSnapFlingBehavior(listState)
+    BoxWithConstraints(modifier = node.style.toModifier()) {
         val sidePadding = ((maxWidth - itemWidth) / 2).coerceAtLeast(16.dp)
         LazyRow(
             state = listState,
@@ -121,7 +136,7 @@ val bannerCarouselComponent: SduiComponent = { node, context ->
                 Box(
                     modifier = Modifier
                         .width(itemWidth)
-                        .height(120.dp)
+                        .height(itemHeight)
                         .graphicsLayer {
                             val info = listState.layoutInfo
                             val viewportCenter = (info.viewportStartOffset + info.viewportEndOffset) / 2f
@@ -129,7 +144,7 @@ val bannerCarouselComponent: SduiComponent = { node, context ->
                             val scale = if (itemInfo != null) {
                                 val itemCenter = itemInfo.offset + itemInfo.size / 2f
                                 val maxDistance = (info.viewportEndOffset - info.viewportStartOffset) / 2f
-                                val fraction = (kotlin.math.abs(itemCenter - viewportCenter) / maxDistance).coerceIn(0f, 1f)
+                                val fraction = (abs(itemCenter - viewportCenter) / maxDistance).coerceIn(0f, 1f)
                                 1f - fraction * 0.18f
                             } else {
                                 0.82f
@@ -171,31 +186,36 @@ val bannerCarouselComponent: SduiComponent = { node, context ->
 val searchHeaderComponent: SduiComponent = { node, context ->
     val placeholder = node.props.strOrEmpty("placeholder", "Search cars, brands...")
     val title = node.props.str("title")
-    val onClick = node.actions["onClick"]
+    val stateKey = node.props.str("stateKey")
+    val value = stateKey?.let { context.currentState[it] }.orEmpty()
     val backgroundColor = node.props.str("backgroundColor")?.let { parseHexColor(it) } ?: Color(0x33FFFFFF)
     val borderColor = node.props.str("borderColor")?.let { parseHexColor(it) } ?: Color(0xFFE0E0E0)
     val hintColor = node.props.str("hintColor")?.let { parseHexColor(it) } ?: Color(0xFFE0E0E0)
 
-    Column(modifier = node.style.toModifier(Modifier.fillMaxWidth().padding(16.dp))) {
+    Column(modifier = node.style.toModifier(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 16.dp))) {
         title?.let { Text(it, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) }
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            readOnly = true,
-            enabled = false,
+            value = value,
+            onValueChange = { newValue ->
+                stateKey?.let {
+                    context.dispatch(SduiAction(type = "updateState", target = it), JsonPrimitive(newValue))
+                }
+            },
+            singleLine = true,
             placeholder = { Text(placeholder, color = hintColor) },
-            shape = RoundedCornerShape(12.dp),
-            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                disabledContainerColor = backgroundColor,
-                disabledBorderColor = borderColor,
-                disabledPlaceholderColor = hintColor,
-                disabledLeadingIconColor = hintColor,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = backgroundColor,
+                unfocusedContainerColor = backgroundColor,
+                focusedBorderColor = borderColor,
+                unfocusedBorderColor = borderColor,
+                focusedPlaceholderColor = hintColor,
+                unfocusedPlaceholderColor = hintColor,
+                focusedLeadingIconColor = hintColor,
+                unfocusedLeadingIconColor = hintColor,
             ),
             leadingIcon = { Text("🔍", color = hintColor) },
-            modifier = Modifier.fillMaxWidth().let {
-                if (onClick != null) it.clickableAction { context.dispatch(onClick, null) } else it
-            },
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -294,6 +314,7 @@ val listRowComponent: SduiComponent = { node, context ->
     val subtitle = node.props.str("subtitle")
     val subtitleColor = node.props.str("subtitleColor")?.let { parseHexColor(it) } ?: Color(0xFF5B5B7A)
     val trailing = node.props.str("trailing")
+    val trailingColor = node.props.str("trailingColor")?.let { parseHexColor(it) } ?: Color(0xFF9E9E9E)
     val imageSize = node.props.intOr("imageSize", 48).dp
     val onClick = node.actions["onClick"]
 
@@ -314,8 +335,8 @@ val listRowComponent: SduiComponent = { node, context ->
             subtitle?.let { Text(it, fontSize = TextUnit(13f, TextUnitType.Sp), color = subtitleColor) }
         }
         when {
-            trailing == "chevron" -> Text("›", fontSize = TextUnit(20f, TextUnitType.Sp), color = Color(0xFF9E9E9E))
-            !trailing.isNullOrBlank() -> Text(trailing, fontSize = TextUnit(12f, TextUnitType.Sp), color = Color(0xFF9E9E9E))
+            trailing == "chevron" -> Text("›", fontSize = TextUnit(20f, TextUnitType.Sp), color = trailingColor)
+            !trailing.isNullOrBlank() -> Text(trailing, fontSize = TextUnit(12f, TextUnitType.Sp), color = trailingColor)
         }
     }
 }

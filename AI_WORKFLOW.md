@@ -20,7 +20,7 @@
   why the git history for this repo is incremental rather than one giant
   commit.
 
-## Three prompt → outcome stories
+## Prompt → outcome stories
 
 ### 1. "the schema doesn't have enough styling/attributes — add real support for borders, opacity, rotation, and flex-style alignment"
 
@@ -101,6 +101,30 @@ then a full-file grep for the two arrangement patterns most likely to hit
 this (`spaceBetween`, `spaceEvenly`) found and fixed all seven affected
 nodes across two tabs, instead of patching only the one the bug report
 pointed at.
+
+### 4. "check on your own — all grid items are cropped from the bottom"
+
+**Outcome**: `Grid`'s `LazyVerticalGrid` needs a fixed pixel height up
+front (it can't measure "wrap content" without knowing an item's size
+before scrolling to it). The first fix guessed a `cellHeight` constant
+(100dp) tuned against the icon-tile grids, multiplied by row count. Told
+to check every tab, not just the one reported: three more grids (90dp
+category-tile images, not 48-56dp icons) were *also* clipped, because
+the same guessed constant didn't fit them either — bumped to 180dp.
+
+**What got rejected**: *"increasing the cellHeightDp is your solution?
+if i increase the no. of rows to 4-5 then what would you suggest?"* — a
+correct call-out that a bigger guess is still a guess, not a fix; it
+would need a new number for every future row count and every new cell
+shape. Since this `Grid` already sets `userScrollEnabled` behavior that
+disables independent scrolling, laziness was buying nothing — rewrote it
+as plain `Row`s chunked by `columns` inside a `Column`, which Compose
+measures and wraps to real content automatically. No constant, no
+per-instance tuning, correct for any row/column count going forward.
+The lesson: "it renders now" isn't the bar — "why does this number
+exist, and does it survive the next screen" is, and an AI-guessed
+constant that merely stops the immediate complaint should be treated as
+a placeholder to interrogate, not a fix to ship.
 
 ## One AI failure
 
@@ -194,3 +218,11 @@ than taken as a closed book.
   `ActionDispatcher` branches call `android.util.Log` directly and were
   left untested rather than pulled in Robolectric to mock it — a scoping
   call worth being explicit about rather than silently skipping.
+- **Check every `dataBinding` variant a fix could plausibly touch, not
+  just the tab the bug was reported on.** Story 4's grid-cropping fix was
+  first verified only against the tab where it was noticed; asked to
+  check the others, three more tabs turned out to have the exact same
+  bug from the exact same guessed constant. A fix that only "renders
+  now" for one variant of a shared component hasn't actually been
+  verified against the component — it's been verified against one
+  caller of it.
