@@ -70,11 +70,11 @@ fun SduiPage(
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                val maxHeight = maxHeaderHeightPx.value
+                val maxHeight = maxHeaderHeightPx.floatValue
                 if (maxHeight <= 0f) return Offset.Zero
-                val current = headerOffsetPx.value
+                val current = headerOffsetPx.floatValue
                 val newOffset = (current + available.y).coerceIn(-maxHeight, 0f)
-                headerOffsetPx.value = newOffset
+                headerOffsetPx.floatValue = newOffset
                 return Offset(0f, newOffset - current)
             }
         }
@@ -82,8 +82,8 @@ fun SduiPage(
 
     val collapseFractionState = remember {
         derivedStateOf {
-            val maxHeight = maxHeaderHeightPx.value
-            if (maxHeight > 0f) (-headerOffsetPx.value / maxHeight).coerceIn(0f, 1f) else 0f
+            val maxHeight = maxHeaderHeightPx.floatValue
+            if (maxHeight > 0f) (-headerOffsetPx.floatValue / maxHeight).coerceIn(0f, 1f) else 0f
         }
     }
 
@@ -91,7 +91,7 @@ fun SduiPage(
         Column(modifier = modifier) {
             Box(
                 modifier = Modifier.fillMaxWidth().onGloballyPositioned { coordinates ->
-                    if (maxHeaderHeightPx.value == 0f) maxHeaderHeightPx.value = coordinates.size.height.toFloat()
+                    if (maxHeaderHeightPx.floatValue == 0f) maxHeaderHeightPx.floatValue = coordinates.size.height.toFloat()
                 },
             ) {
                 RenderNode(node = header, registry = registry, currentState = currentState, actionDispatcher = actionDispatcher)

@@ -250,9 +250,6 @@ hardware**, no emulator caveat attached. Reading it honestly:
 
 ## Measure → optimize loop
 
-*(fill in as you actually do this — this section is scored on honesty, not
-on the numbers looking good)*
-
 - What you tried: reported scroll jank on the SDUI landing page. Reproduced
   with `adb shell input swipe` (23 synthetic swipes through the full page)
   and read `adb shell dumpsys gfxinfo <pkg>` (reset immediately after cold
