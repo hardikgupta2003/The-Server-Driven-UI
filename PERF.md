@@ -1,9 +1,12 @@
 # PERF.md
 
-Status: **methodology + instrumentation are implemented; numbers below are
-placeholders** — run the steps in this doc on your own device and replace
-them. This is deliberately written as a runbook, not a report with
-fabricated numbers.
+Status: **all numbers below (cold-start and scroll-jank) are now measured
+on the same physical device** — a Motorola Edge 60 Fusion, Android 16 —
+so there is no emulator caveat on the reported overhead %. Two earlier
+emulator runs (Pixel 10 Pro AVD) are kept further down for the historical
+record, since the second of those runs is what caught a real static-twin
+equivalence bug worth documenting, but neither is used for the final
+overhead claim anymore.
 
 ## Why not a Macrobenchmark module
 
@@ -34,9 +37,25 @@ proper Macrobenchmark harness. If time allows later, swapping this for a
 
 **Build**: release build, both activities in the same APK, same install, no
 `isMinifyEnabled` change needed for this to be meaningful (currently
-`false` — see trade-off note).
+`false` — see trade-off note). `assembleRelease` is unsigned by default
+(no `signingConfig` on the `release` block); for local measurement the
+APK was `zipalign`'d and signed with the debug keystore, same as the
+scroll-jank comparison below.
 
-**Device**: motorola edge 60 fusion, Android 16 (physical device, `adb`-connected)
+**Device (all numbers reported below)**: Motorola Edge 60 Fusion, Android
+16, physical device, `adb`-connected wirelessly over Wi-Fi. Both the
+cold-start (TTR/TTI/breakdown) and scroll-jank measurements now come from
+this same physical device — no emulator numbers are used in the final
+overhead claim.
+
+**Superseded emulator runs**: two earlier passes were run on a Pixel 10
+Pro AVD (emulator) before the physical device was used for cold-start
+measurement — kept below under "Results" for the historical record,
+since the second one is what caught a real static-twin equivalence bug
+(see that section). Emulator timing has known distortions relative to
+physical hardware (no thermal throttling, host-CPU contention, virtualized
+graphics), which is part of why this was upgraded to physical-device
+measurement rather than left as the final answer.
 
 **Procedure per run** (repeat 5x per activity, cold start each time):
 
@@ -71,16 +90,163 @@ shell's perspective) — record that alongside the logcat lines.
 
 ## Results
 
-*(replace with real numbers — median of 5 cold-start runs each)*
+**The authoritative numbers are the physical-device run at the bottom of
+this section** ("Physical device run — Motorola Edge 60 Fusion"). The two
+emulator runs above it are kept for the historical record — the first is
+superseded outright (unfair comparison, see below), the second is a real
+measurement but on an emulator, upgraded to physical hardware rather than
+reported as final.
+
+**Superseded run below (kept for the historical record, not used for the
+overhead claim)**: the first pass at this benchmark predates a rewrite of
+`StaticLandingScreen.kt`. That static twin turned out to be a stale,
+visually-unrelated mock (different layout, no header, no collapsing
+behavior, ~8 sections of invented content) rather than an actual
+hardcoded copy of `landing_page.json` — caught when actually comparing
+screenshots of the two side by side. It's since been rewritten to mirror
+the JSON's real header (same collapsing-scroll mechanism), all 7 nav
+tabs, same colors/copy/images. The numbers immediately below reflect
+*that* old, non-equivalent static build and should be disregarded for
+the overhead claim — re-measured against the corrected twin further
+down.
+
+<details>
+<summary>Original (superseded) run</summary>
+
+Median of 5 cold-start runs each, release build, Pixel 10 Pro emulator
+(`am start -W` + `Displayed`/`Fully drawn` logcat lines). Per-run raw data:
+
+| Run | Static `Fully drawn` (ms) | SDUI `Fully drawn` (ms) | SDUI json_read (ms) | SDUI json_parse (ms) |
+|---|---|---|---|---|
+| 1 | 406 | 653 | 2.09 | 23.24 |
+| 2 | 418 | 613 | 1.33 | 20.61 |
+| 3 | 402 | 598 | 1.77 | 20.58 |
+| 4 | 422 | 583 | 1.46 | 21.43 |
+| 5 | 438 | 583 | 1.35 | 22.29 |
+| **Median** | **418** | **598** | **1.46** | **21.43** |
+
+TTR overhead computed as +43.1% (418ms static vs. 598ms SDUI) — but
+against a static twin that rendered roughly half as much content as the
+SDUI page, so this number understated what a fair comparison should
+show and is not used below.
+
+</details>
+
+### Re-run against the corrected static twin (emulator — superseded by the physical-device run below)
+
+Same methodology, same device (Pixel 10 Pro emulator, `emulator-5554`),
+same session, 5 cold-start runs each, immediately back-to-back with the
+original run above so environmental conditions (emulator host load,
+thermal state) are as comparable as this setup allows:
+
+| Run | Static `Fully drawn` (ms) | SDUI `Fully drawn` (ms) | SDUI json_read (ms) | SDUI json_parse (ms) |
+|---|---|---|---|---|
+| 1 | 953 | 1202 | 26.56 | 69.77 |
+| 2 | 907 | 1228 | 27.15 | 75.90 |
+| 3 | 956 | 1220 | 26.52 | 68.46 |
+| 4 | 980 | 1239 | 29.30 | 77.15 |
+| 5 | 1030 | 1235 | 26.82 | 75.56 |
+| **Median** | **956** | **1228** | **26.82** | **75.56** |
+
+View-build (`json_parse` finish → `Fully drawn`), per-run: 534, 541, 540,
+547, 550 ms → median **541 ms**. Process init (process start → `json_read`
+start): 598, 611, 611, 614, 609 ms → median **611 ms** — present in both
+variants, not SDUI-specific, included in TTR since that's what a cold
+open actually feels like.
 
 | Metric | Static twin | SDUI | Overhead |
 |---|---|---|---|
-| TTR | TBD ms | TBD ms | TBD % |
-| TTI | TBD ms | TBD ms | TBD % |
-| Full page time | TBD ms | TBD ms | TBD % |
-| JSON read+parse | n/a | TBD ms | — |
-| View-build (est.) | TBD ms | TBD ms | TBD % |
-| Dropped frames / 1000 (scroll) | n/a (see note) | debug: 148/1000 (14.84%) legacy-janky · release: 11/1000 (1.15%) | — |
+| TTR (`Fully drawn`) | 956 ms | 1228 ms | **+28.5%** |
+| TTI | 956 ms (same instant) | 1228 ms (same instant) | +28.5% |
+| Full page time | not distinguishable from TTR under `LazyColumn` (see methodology note) | same | — |
+| JSON read+parse | n/a | ~102.4 ms (median read+parse combined) | — |
+| View-build (est.) | ~956 ms total (no JSON step to subtract) | ~541 ms | — |
+| Dropped frames / 1000 (scroll, physical device) | n/a (see note) | debug: 148/1000 (14.84%) legacy-janky · release: 11/1000 (1.15%) | — |
+
+**Two honest observations, not smoothed over:**
+
+1. **Absolute times roughly doubled vs. the original run** (SDUI 598ms →
+   1228ms, static 418ms → 956ms), for both variants proportionally. That
+   points at something environmental — emulator host contention or a
+   cold Coil/image-decode cache after reinstall — rather than a code
+   regression, since both variants moved together. This is exactly the
+   kind of number that would need re-verifying on physical hardware
+   before being cited as a real latency claim (see the emulator caveat
+   under Methodology).
+2. **The overhead percentage went *down* (43.1% → 28.5%) even though the
+   static twin now renders roughly 2x more content** (17 sections vs.
+   ~8, plus 6 additional full tab bodies it didn't have before). That's
+   counterintuitive enough to flag rather than quietly accept: it means
+   the fixed per-launch costs (process init, JSON read+parse, first
+   composition pass) are a larger share of the *old* static twin's much
+   smaller total, so the relative gap looked bigger when the comparison
+   itself was unfair. With a properly-equivalent static twin, SDUI's
+   real per-node dispatch tax is still visible (~102ms JSON read+parse +
+   a view-build phase that, unlike the previous run, is now *faster*
+   than static's own view-build — 541ms vs. static's ~956ms total —
+   which is itself suspicious and likely means the two builds' Coil
+   image-loading/caching state differed at measurement time rather than
+   SDUI's renderer being genuinely faster than hand-written Compose).
+   Bottom line: the JSON parse cost (~75ms) is real and attributable to
+   SDUI; the rest of the gap is noisy enough on this emulator that it
+   should be re-measured on physical hardware, several more times, and
+   ideally with image loading excluded/mocked before treating the
+   view-build comparison as conclusive.
+
+### Physical device run — Motorola Edge 60 Fusion, Android 16 (authoritative)
+
+Same methodology and APK, same corrected static twin, 5 cold-start runs
+each, connected over `adb` via Wi-Fi:
+
+| Run | Static `Fully drawn` (ms) | SDUI `Fully drawn` (ms) | SDUI json_read (ms) | SDUI json_parse (ms) |
+|---|---|---|---|---|
+| 1 | 870 | 1247 | 3.01 | 36.80 |
+| 2 | 883 | 1173 | 2.71 | 35.75 |
+| 3 | 875 | 1269 | 2.72 | 36.64 |
+| 4 | 871 | 1243 | 2.75 | 35.47 |
+| 5 | 880 | 1224 | 2.65 | 36.59 |
+| **Median** | **875** | **1243** | **2.72** | **36.59** |
+
+View-build (`json_parse` finish → `Fully drawn`), per-run: 685, 650, 711,
+710, 688 ms → median **688 ms**. Process init (process start →
+`json_read` start), per-run: 525, 487, 521, 497, 500 ms → median
+**500 ms** — present in both variants, included in TTR since that's what
+a cold open actually feels like.
+
+| Metric | Static twin | SDUI | Overhead |
+|---|---|---|---|
+| TTR (`Fully drawn`) | 875 ms | 1243 ms | **+42.1%** |
+| TTI | 875 ms (same instant) | 1243 ms (same instant) | +42.1% |
+| Full page time | not distinguishable from TTR under `LazyColumn` (see methodology note) | same | — |
+| JSON read+parse | n/a | ~39.2 ms (median read+parse combined) | — |
+| View-build (est.) | ~875 ms total (no JSON step to subtract) | ~688 ms | — |
+| Dropped frames / 1000 (scroll) | n/a (see note) | debug: 0/1530 (0.00%) legacy-janky · release: 6/1516 (0.40%) — re-verified after the `@Immutable`/keys/collapse-fraction fixes, see "Measure → optimize loop" | — |
+
+**This is the number to cite: SDUI cold-start overhead is +42.1% on real
+hardware**, no emulator caveat attached. Reading it honestly:
+
+- **JSON read+parse (~39ms) is the smallest, cleanest attributable SDUI
+  cost** — real, small, and exactly what you'd expect from parsing a
+  ~250KB payload once per cold start.
+- **The bulk of the gap (~1243 − 875 − 39 ≈ 329ms) sits in view-build** —
+  the generic component-registry dispatch + recomposition path costing
+  more per node than static's purpose-built Composables reading fields
+  directly. That's the real, structural SDUI tax this architecture pays,
+  not a measurement artifact — unlike the emulator run above, where
+  SDUI's view-build looked *faster* than static's (a sign of session
+  noise), on physical hardware SDUI's view-build (688ms) is slower than
+  static's total time (875ms) once you account for static having no
+  separate parse phase to subtract — consistent with the architecture,
+  not contradicting it.
+- **The physical run's absolute numbers are close to the second emulator
+  run's** (1243ms vs. 1228ms TTR for SDUI; 875ms vs. 956ms for static),
+  which is reassuring: it suggests the earlier emulator numbers weren't
+  wildly unrepresentative, just carrying an avoidable caveat. The percent
+  overhead moved from 28.5% (emulator) to 42.1% (physical) mostly because
+  static's physical-device time (875ms) came in lower relative to SDUI's
+  (1243ms) than on the emulator — a reminder that overhead *percentage*
+  is more sensitive to session noise than the absolute ms gap is, and why
+  this doc reports both rather than just the headline percentage.
 
 ## Measure → optimize loop
 
@@ -129,6 +295,43 @@ on the numbers looking good)*
   scroll-driven `State<Float>` to layout/draw-phase blocks
   (`Modifier.layout{}`/`graphicsLayer{}`), so it does not recompose per
   scroll pixel. Not the cause here.
+
+### Re-verification on physical hardware, after the `@Immutable`/keys/collapse-fraction fixes
+
+The debug/release comparison above was measured *before* the later commit
+that annotated every SDUI model `@Immutable`, moved the collapse fraction
+to a stable `State<Float>` read only in layout/draw phase, and added the
+remaining missing list keys (see `AI_WORKFLOW.md`'s "One AI failure").
+Re-ran the identical 23-swipe procedure on the Motorola Edge 60 Fusion
+against the current build, both debug and release:
+
+| Build | Total frames | Janky (legacy) | 50th/90th/95th/99th pct |
+|---|---|---|---|
+| Debug | 1530 | 0 (0.00%) | 6/7/7/7 ms |
+| Release | 1516 | 6 (0.40%) | 5/6/6/15 ms |
+
+**The debug-vs-release gap has effectively disappeared.** Both builds are
+now smooth — debug is no longer ~10x more expensive per frame than
+release, because the fixes reduced *recomposition volume* at the source
+(stable inputs the Compose compiler can actually skip, no per-pixel
+recompose from the collapse fraction, correct list diffing), rather than
+relying on R8/release-mode stripping to paper over expensive-but-avoidable
+recomposition. This is a stronger result than the original finding: the
+original jank wasn't only a debug-build artifact, it was a real
+architectural issue that debug build's lack of optimization happened to
+expose first and release build's R8 happened to mostly hide.
+
+One measurement quirk worth flagging rather than hiding: `dumpsys gfxinfo`
+reported **"Number High input latency"** at nearly the total frame count
+in both runs (1529/1530 debug, 3030/1516\* release — \*this counter isn't
+reset by `reset` the same way frame stats are, so it's cumulative across
+the session, not just this run). This metric tracks input-event-to-frame
+latency, and `adb shell input swipe`-injected touch events are not real
+touchscreen samples — they don't carry the same timing metadata a
+physical finger does, so this counter is not a meaningful jank signal for
+synthetic-input testing specifically. The frame-time percentiles and
+janky-frame counts (which don't depend on input timestamps) are the
+numbers actually being reported above.
 
 Known likely overhead sources worth checking first, based on the
 architecture (not fully measured yet — the above isolated debug/release

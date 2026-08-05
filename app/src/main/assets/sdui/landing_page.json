@@ -5748,6 +5748,7 @@
                         "id": "challan_form_country_chip",
                         "type": "Column",
                         "style": {
+                          "width": "wrap",
                           "background": "#392BCB",
                           "padding": [
                             12,
@@ -5861,6 +5862,7 @@
                     "type": "Column",
                     "props": {},
                     "style": {
+                      "width": "100",
                       "alignItems": "center"
                     },
                     "children": [
@@ -5889,6 +5891,7 @@
                     "type": "Column",
                     "props": {},
                     "style": {
+                      "width": "100",
                       "alignItems": "center"
                     },
                     "children": [
@@ -5917,6 +5920,7 @@
                     "type": "Column",
                     "props": {},
                     "style": {
+                      "width": "100",
                       "alignItems": "center"
                     },
                     "children": [
@@ -6164,6 +6168,7 @@
                         "id": "car_check_fraud_history_left",
                         "type": "Row",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -6252,6 +6257,7 @@
                         "id": "car_check_fraud_odometer_left",
                         "type": "Row",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -6340,6 +6346,7 @@
                         "id": "car_check_fraud_rto_left",
                         "type": "Row",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -6493,6 +6500,7 @@
                         "id": "car_check_stat_1",
                         "type": "Column",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -6521,6 +6529,7 @@
                         "id": "car_check_stat_2",
                         "type": "Column",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -6549,6 +6558,7 @@
                         "id": "car_check_stat_3",
                         "type": "Column",
                         "style": {
+                          "width": "wrap",
                           "alignItems": "center"
                         },
                         "props": {},
@@ -7071,7 +7081,25 @@
     "header": {
       "id": "page_header",
       "type": "Column",
-      "props": {},
+      "style": {
+        "background": "#392BCB"
+      },
+      "props": {
+        "_note": "Background is set here too, not just on the 3 child rows below — the header_location_row's collapse animation resizes this Column every scroll frame, and painting background only on children left a 1-frame gap where the parent's own (transparent -> light theme) background could flash through before a child's background catches up. Painting it once at this level guarantees the whole header area is always solid, matching the static twin's single-Column-background approach."
+      },
+      "colorBinding": {
+        "stateKey": "selectedNavTab",
+        "variants": {
+          "all": "#392BCB",
+          "buy": "#0A1A6B",
+          "sell": "#1B5E20",
+          "loans": "#1565C0",
+          "challan": "#00695C",
+          "car_check": "#6B2E12",
+          "default": "#392BCB",
+          "insurance": "#1565C0"
+        }
+      },
       "children": [
         {
           "id": "header_location_row",

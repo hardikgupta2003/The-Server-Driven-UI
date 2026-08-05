@@ -73,8 +73,16 @@ private fun collapseAwareWrapper(node: SduiNode, content: @Composable () -> Unit
  */
 val columnComponent: SduiComponent = { node, context ->
     collapseAwareWrapper(node) {
+        // Any explicit `style.width` — not just "wrap" — must suppress the
+        // full-width default rather than compose with it: chaining
+        // `Modifier.fillMaxWidth().width(100.dp)` doesn't shrink to 100dp,
+        // because fillMaxWidth already fixed min=max=parent width, and a
+        // narrower fixed width afterward gets coerced back up to satisfy
+        // that incoming constraint. Skipping the default whenever width is
+        // set at all lets "wrap"/"match"/a fixed dp value fully own sizing.
+        val base = if (node.style?.width != null) Modifier else Modifier.fillMaxWidth()
         Column(
-            modifier = node.style.toModifier(Modifier.fillMaxWidth()),
+            modifier = node.style.toModifier(base),
             verticalArrangement = verticalArrangementOf(node.style?.justifyContent),
             horizontalAlignment = horizontalAlignmentOf(node.style?.alignItems),
         ) {
@@ -130,8 +138,10 @@ val rowComponent: SduiComponent = { node, context ->
         val align = node.style?.alignItems ?: node.props.str("verticalAlignment", "center")?.let {
             if (it == "top") "start" else "center"
         }
+        // Same explicit-width fix as columnComponent — see its kdoc.
+        val base = if (node.style?.width != null) Modifier else Modifier.fillMaxWidth()
         Row(
-            modifier = node.style.toModifier(Modifier.fillMaxWidth()),
+            modifier = node.style.toModifier(base),
             horizontalArrangement = horizontalArrangementOf(justify),
             verticalAlignment = verticalAlignmentOf(align),
         ) {

@@ -152,7 +152,7 @@ val chipRowComponent: SduiComponent = { node, context ->
             contentPadding = PaddingValues(start = contentPaddingHorizontalDp.dp, top = contentPaddingTopDp.dp, end = contentPaddingHorizontalDp.dp),
             modifier = node.style.toModifier(),
         ) {
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(items, key = { _, item -> item.str("value").ifBlank { item.str("label") } }) { index, item ->
                 val label = item.str("label")
                 val value = item.str("value")
                 val icon = item.str("icon", "•")
@@ -221,7 +221,7 @@ val chipRowComponent: SduiComponent = { node, context ->
             contentPadding = PaddingValues(horizontal = contentPaddingHorizontalDp.dp, vertical = contentPaddingVerticalDp.dp),
             modifier = node.style.toModifier(),
         ) {
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(items, key = { _, item -> item.str("value").ifBlank { item.str("label") } }) { index, item ->
                 val label = item.str("label")
                 val value = item.str("value")
                 FilterChip(

@@ -1,12 +1,12 @@
-# The Server Driven UI — Cars24 SDUI Assignment
+# The Server Driven UI — SDUI 
 
 An Android/Kotlin/Jetpack Compose Server-Driven UI system: the server sends
-JSON, the client renders the page. Built for the Cars24 Mobile Engineering
-SDUI assignment.
+JSON, the client renders the page. Built for the Mobile Engineering
+SDUI.
 
 ## Screen chosen, and why
 
-**The Cars24 home/landing page.** The brief explicitly flags it as clearing
+**The home/landing page.** The brief explicitly flags it as clearing
 the complexity bar, and it's the screen most likely to be re-used as the
 basis for comparison against whatever "surprise screen" shows up in the
 first round — building deep on the landing page's vocabulary (rails, grids,
@@ -127,13 +127,31 @@ them is not.
 - **No dedicated overlay/`Box` component or pinned/sticky-region concept**
   yet — both are real gaps surfaced by the `COVERAGE.md` self-test against
   an unplanned screen, not discovered by the grader first.
-- **Images via Coil + network URLs** (Lorem Picsum) rather than bundled
-  drawables — more "real-feeling" for the demo, but means TTR numbers in
-  `PERF.md` need to explicitly account for image loads being async and
-  off the critical path, not silently baked into the headline number.
+- **Images via Coil + network URLs** (pexels.com, a fixed pool of 10 URLs
+  reused across cards) rather than bundled drawables — more "real-feeling"
+  for the demo, but means TTR numbers in `PERF.md` need to explicitly
+  account for image loads being async and off the critical path, not
+  silently baked into the headline number.
 - **No R8/ProGuard shrinking enabled** (`isMinifyEnabled = false`) — first
   lever to pull if `PERF.md` numbers show release-build overhead worth
   chasing.
+- **`SduiStyle.elevation` is a dead field** — present in the schema since
+  the very first commit, never actually read by `toModifier()`; every card
+  gets Material3's default elevation instead. Left in rather than
+  retroactively cleaned up, since removing a schema field the moment it's
+  found unused is a smaller lesson than being honest that it shipped
+  unwired — see `AI_WORKFLOW.md`'s first story.
+- **`Column`/`Row` defaulting to `fillMaxWidth()` unconditionally** caused
+  a real bug (a chip nested inside a Row claimed the whole row's width,
+  starving its sibling — see `AI_WORKFLOW.md`'s third story) before
+  `style.width` was fixed to actually suppress that default. The deeper
+  trade-off this exposed: composing one-off UI patterns (a country-code
+  chip, a list row with a trailing chevron) from raw `Row`/`Column`
+  primitives is fragile — a dedicated `Chip`/`ListRow` component in the
+  registry would make this whole bug class structurally impossible and
+  shrink the JSON, at the cost of a larger registry. Not done yet; noted
+  in `COVERAGE.md` as a scoped-out improvement rather than silently
+  deferred.
 
 ## Docs map
 

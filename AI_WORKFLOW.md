@@ -22,91 +22,124 @@
 
 ## Three prompt → outcome stories
 
-### 1. "write json schema design and setting up the module structure for me"
+### 1. "the schema doesn't have enough styling/attributes — add real support for borders, opacity, rotation, and flex-style alignment"
 
-**Outcome**: `SCHEMA.md` plus the full `sdui/` package (models, registry,
-renderer, state, actions, components) in one pass, verified against a real
-`./gradlew :app:compileDebugKotlin` run rather than shipped on inspection
-alone.
+**Outcome**: `SduiStyle` grew from its original 8 fields
+(`padding`/`margin`/`background`/`cornerRadius`/`elevation`/`alignment`/
+`width`/`height` — see `dac056e`, the very first schema commit) to its
+current 13: adding `justifyContent`/`alignItems` (flexbox-style main-/
+cross-axis control shared by `Row` and `Column`), `opacity`, `borderWidth`/
+`borderColor`, and `rotation`. This is the difference between the schema
+being able to express "a box with a color" and being able to express an
+actual bordered card, a rotated badge, or a properly-centered chip row —
+real patterns the Cars24 landing page needed once its content stopped
+being placeholder text.
 
-**What got rejected/rewritten**: the first draft of the unknown-component
-debug placeholder (`UnknownComponent.kt`) invented its own `Int.dp()`
-helper with a broken operator-overload chain instead of just using
-Compose's existing `Int.dp` extension property — a case of the AI adding
-incidental complexity for something the platform already provides for
-free. Caught immediately because it wouldn't have compiled anyway; rewrote
-to plain `8.dp`, `12.dp` literals. Same pass, a `SectionTitle` composable
-came out with a nonsensical chained-`Modifier.let{}` sequence that did
-nothing — rewritten to a plain `Modifier.padding(...)` call. Neither was
-subtle; both are the kind of "generated something that looks like code but
-doesn't reduce to anything sensible" output that's worth scanning for
-specifically, not just trusting because it type-checked eventually.
+**What got rejected/rewritten**: `elevation` — one of the *original* 8
+fields — was never actually wired up. It's still declared on `SduiStyle`
+today but `toModifier()` never reads it; every card in the schema gets its
+elevation from Material3's default `Card` styling instead. Caught by
+tracing every `SduiStyle` field to its consumer in `StyleModifier.kt`
+while writing this doc, not by the AI flagging it unprompted — a small,
+honest example of a field that sounded reasonable at schema-design time
+but never got a real caller, which is exactly the kind of thing "explains
+every line in debrief" is supposed to surface.
 
-### 2. Designing how a chip selection changes a car rail's content
+### 2. "add a collapsing header and make the nav tabs swap the whole page body, like the real Cars24 app"
 
-**Outcome**: the `dataBinding` variant-map mechanism in `SCHEMA.md` — the
-server precomputes every variant (`suv`/`sedan`/`hatchback`/`muv`), the
-client just picks one based on state.
+**Outcome**: a page-level `header` slot (separate from `page.sections`,
+see `PageContent`), a `NestedScrollConnection`-driven collapse fraction
+(`CollapseFraction.kt`/`Collapsible.kt`) that lets the header eat scroll
+pixels before the body list scrolls, `ColorBinding` as a new schema
+concept (a node's background can now depend on app state, not just its own
+static style), and the `tab_body` node's `dataBinding` scoped to the
+*entire* page body — so selecting "Buy used car" swaps all 17 sections at
+once, not just one rail.
 
-**What got rejected**: the more "obviously general" first instinct for this
-— and the direction several real SDUI frameworks actually take — is a
-small expression/templating language (`{{if category == 'suv'}}...`) so
-the client can filter/compute against arbitrary conditions. That was
-deliberately **not** built. Reasoning: it's a much bigger surface to get
-right (parsing, evaluation, error cases) for marginal benefit inside an
-8–10 hour budget, and the variant-map approach still satisfies the brief's
-actual requirement ("a tab/chip selection that changes content") without
-needing a runtime evaluator at all. This is the one design rejection in
-the project that wasn't a bug catch — it was scoping a fancier-sounding
-option down on purpose, which is exactly the kind of judgment call worth
-being explicit about rather than quietly defaulting to whichever version
-sounds more impressive.
+**What got flagged rather than silently shipped**: the real Cars24 app
+pins the search bar + tab row while only the location row scrolls away.
+This schema doesn't have a sticky/pinned-region concept yet, so only the
+location row's collapse was implemented — and the JSON itself carries a
+`_note` on `nav_tab_chips` saying so explicitly, rather than the gap being
+discovered later by someone reading the code. That note is also what
+`COVERAGE.md`'s honest-gap-listing is supposed to look like in practice.
 
-### 3. "you do it i want to get code in my working directory"
+### 3. Debugging why the challan tab looked broken on-device — a schema-level layout bug, not a data bug
 
-**Outcome**: the SDUI branch committed and fast-forward merged into the
-user's actual project folder (`main`), moving work out of an isolated git
-worktree the user hadn't asked for and couldn't see in Android Studio.
+**Outcome**: caught by actually looking at screenshots on the Pixel 10 Pro
+emulator, not by re-reading the JSON. The "IND" country-code chip inside
+the challan form had exploded into a ~900px-tall box with its sibling
+placeholder text invisible; separately, three "why choose us" columns and
+a 3-stat trust row were each collapsing down to just their first item.
+Root cause: `Column`/`Row` default to `Modifier.fillMaxWidth()`
+unconditionally in `Primitives.kt`, and `style.width == "wrap"` was
+supposed to opt out of that but was implemented as a literal no-op
+(`spec == "wrap" -> modifier`) — since it composed *after* the
+already-applied `fillMaxWidth()` base, it had nothing left to undo.
 
-**What went wrong and got caught**: the first commit attempt used a
-heredoc commit message containing `->` arrow characters; the shell
-misparsed it and `git commit` silently printed its own usage/help text
-instead of committing — no commit was created. This wasn't caught by
-assuming success; it was caught by treating "the output doesn't look like
-a normal commit confirmation" as a signal to immediately re-run `git log`
-and `git status` and confirm nothing had landed, then re-committing with a
-plainer message. A second, unrelated surprise in the same stretch: something
-outside this session's control (most likely Android Studio's VCS sync)
-checked the user's main folder out from `main` to `development` right
-after the merge — caught the same way, via `git reflog`, not assumed away.
+**What got rejected and rewritten**: the first fix only special-cased
+`"wrap"` (skip the `fillMaxWidth()` default when width is exactly
+`"wrap"`). It looked right and fixed the IND chip — but the challan
+"why" columns, given an explicit fixed width (`"100"`) instead of
+`"wrap"`, *still* collapsed to one visible item after that fix, because
+`Modifier.fillMaxWidth().width(100.dp)` doesn't shrink to 100dp — the
+first modifier already fixed min=max=parent-width, and Compose's
+constraint resolution coerces the later, smaller request back up to
+satisfy it. That regression was only caught by re-screenshotting after
+the "fix" and noticing the exact same symptom, not by assuming the
+narrower patch was sufficient. The real fix generalizes the condition to
+*any* explicit `style.width` (not just `"wrap"`) suppressing the default —
+then a full-file grep for the two arrangement patterns most likely to hit
+this (`spaceBetween`, `spaceEvenly`) found and fixed all seven affected
+nodes across two tabs, instead of patching only the one the bug report
+pointed at.
 
 ## One AI failure
 
-**Where**: Compose's `LazyRow`/`LazyColumn`/`LazyVerticalGrid` list-based
-`items(...)` DSL is implemented as an **extension function** that must be
-explicitly imported (`androidx.compose.foundation.lazy.items`, and
-separately `androidx.compose.foundation.lazy.grid.items` for grids). Code
-was generated calling `items(node.children, key = { it.id }) { ... }`
-inside several component files without that import present.
+**Where**: the whole SDUI landing page's scroll — every rail, every
+recomposition, every collapsing-header frame — was janky and dropping
+frames after an earlier round of AI-generated feature work (the
+collapsing header + dynamic color binding + multi-tab body swap). The
+animations visibly stuttered under real scrolling, not just in a
+synthetic benchmark.
 
-**Why it went wrong silently at first**: without the import, Kotlin didn't
-raise "unresolved reference" — it resolved `items` to a *different*,
-also-valid overload (`LazyListScope.items(count: Int, ...)`), then reported
-the failure several layers downstream as `Argument type mismatch: actual
-type is 'List<SduiNode>', but 'Int' was expected` in four unrelated files
-at once. That's a platform-API failure mode specifically because the
-overload exists and is plausible, not a straightforward typo — a purely
-visual code review of any single file would not obviously flag it.
+**Why it went wrong**: three separate root causes stacked on top of each
+other, all introduced the same way — code that *looked* reasonable and
+compiled cleanly, but wasn't actually stable/cheap under Compose's
+recomposition model:
+1. `SduiNode`/`SduiStyle`/`ColorBinding`/etc. all hold `Map`/`List`
+   properties, which the Compose compiler treats as **unstable by
+   default** — it can't prove immutability from the interface alone, so
+   every component function taking an `SduiNode` parameter was skipped
+   from Compose's "skip recomposition if inputs are unchanged"
+   optimization, even though these nodes are parsed once from JSON and
+   never mutated in place.
+2. The collapse fraction was first passed around as a raw `Float`, so
+   *reading* it anywhere in a composable body — not just in a layout/draw
+   phase block — triggered a full recomposition on every scroll-pixel
+   update, dozens of times a second.
+3. Several `LazyRow`/`LazyColumn`/`LazyVerticalGrid` lists were missing
+   explicit `key = { it.id }` on their `items(...)` calls, so Compose
+   couldn't diff list identity across recompositions and re-created/
+   re-measured rows it didn't need to.
 
-**How it was caught**: running `./gradlew :app:compileDebugKotlin` after
-finishing the module and reading the actual compiler output, rather than
-assuming a set of individually-plausible-looking Compose files would link.
-The fix was mechanical once diagnosed (add the missing imports in
-`SduiRenderer.kt`, `Primitives.kt`, `Interactive.kt`, `Composite.kt`), but
-the failure mode itself is exactly why "the AI wrote that part" isn't
-sufficient verification — the compiler is the actual check, and it was
-run after every non-trivial file addition in this project, not just once
-at the end.
+**How it was caught and fixed**: not by reading the code and guessing —
+by treating the visible jank as the actual bug report and instrumenting
+against it (`adb shell dumpsys gfxinfo` frame-time percentiles, described
+in `PERF.md`'s measure→optimize loop), then fixing each cause at its
+source rather than papering over the symptom: annotated every SDUI model
+data class `@Immutable` (`SduiModels.kt`) so Compose can trust them as
+stable inputs; changed `LocalSduiCollapseFraction` to carry a stable
+`State<Float>` object instead of a raw `Float`, with every real per-pixel
+read confined to `Modifier.layout{}`/`graphicsLayer{}` blocks in
+`CollapsibleOnHide` (draw/layout phase, not composition — see that file's
+kdoc); and added explicit item keys to the lists that were missing them.
+One gap survived even that pass: `ChipRow`'s two `itemsIndexed(...)` calls
+in `Interactive.kt` were still missing keys after the rest of the app was
+fixed — found and closed out later, while double-checking this exact
+story for accuracy before writing it down, which is its own small lesson
+in why "we already fixed the perf issue" needs to be re-verified rather
+than taken as a closed book.
 
 ## Verification strategy
 
@@ -120,11 +153,24 @@ at the end.
   JSON problem, not misdiagnosed as a Kotlin/serialization problem.
 - **Re-check git state after every git operation** — `git status`/`git
   log`/`git reflog`, not just trusting the previous command's exit
-  behavior — which is what caught both the misparsed commit message and
-  the external branch-switch described above.
+  behavior. Caught a real incident earlier in the project: a heredoc
+  commit message containing `->` arrow characters got misparsed by the
+  shell, so `git commit` silently printed its own usage/help text instead
+  of committing — no commit was created. Treating "the output doesn't
+  look like a normal commit confirmation" as a signal to immediately
+  re-run `git log`/`git status` (rather than assuming success) is what
+  caught it, before it could look like lost work later.
 - **Read the unknown-component and action-dispatch paths against the
   brief's actual requirement** ("must never crash") rather than trusting
   they work because the happy path compiles — traced the registry-miss
   branch and the malformed-action branch explicitly rather than assuming
   defensive-looking code (`as? String ?: default`) is automatically
   correct everywhere it's used.
+- **Screenshot the actual running app on-device, not just the JSON/code**
+  — the challan-tab layout bug (story 3 above) was invisible from reading
+  `landing_page.json` or `Primitives.kt` in isolation; both looked
+  reasonable on their own. It only surfaced by `adb exec-out screencap`
+  against the Pixel 10 Pro emulator and comparing what actually rendered
+  against the static twin. The same discipline caught the first fix
+  attempt's regression (see story 3) — re-screenshotting after a "fix"
+  rather than assuming it worked because the reasoning sounded right.
