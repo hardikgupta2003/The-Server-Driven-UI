@@ -25,7 +25,7 @@ uses Android's own cold-start instrumentation:
   — triggers a second `Fully drawn` logcat line with the elapsed time since
   process start. This is Android's own recommended technique for TTR-style
   measurement outside of Macrobenchmark.
-- [`PerfTrace.kt`](app/src/main/java/com/hardik/the_server_driven_ui/perf/PerfTrace.kt)
+- [`PerfTrace.kt`](sdui/src/main/java/com/hardik/the_server_driven_ui/sdui/perf/PerfTrace.kt)
   adds two extra markers around the JSON read + parse step specifically, so
   the SDUI breakdown (parse vs view-build) is derivable from the same log.
 

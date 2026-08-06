@@ -6,7 +6,7 @@
 |---|---|---|---|
 | `Column` | Layout primitive | — (uses `children`) | Generic vertical stack |
 | `Row` | Layout primitive | — (uses `children`) | Generic horizontal stack |
-| `Grid` | Layout primitive | `columns` (Int), `title`, `titleBadgeLabel`, `trailingActionLabel` | Plain `Row`s chunked by `columns` inside a `Column` — deliberately not a `LazyVerticalGrid`: this grid already sets `userScrollEnabled`-equivalent behavior (nothing scrolls independently of the outer page), so it wraps its own real content instead of guessing a fixed pixel height, and works unchanged for any row count |
+| `Grid` | Layout primitive | `columns` (Int), `title`, `titleBadgeLabel`, `trailingActionLabel` | Plain `Row`s chunked by `columns` inside a `Column` — deliberately not a `LazyVerticalGrid`. This grid never scrolls independently of the outer page anyway, so laziness bought nothing; a plain, non-lazy layout wraps its own real content instead of a fixed pixel height guessed per cell, and works unchanged for any row count |
 | `CarouselRail` | Layout primitive | `title`, `titleBadgeLabel`, `trailingActionLabel` | Horizontally scrolling `LazyRow`; identical mechanism whether children are `CarCard`s or banners |
 | `Text` | Leaf | `text`, `size`, `weight` (`bold`/`medium`/normal), `color` (hex) | |
 | `Image` | Leaf | `url`, `width`, `height`, `alt` | Missing/failed `url` renders a stable gray placeholder, never a layout hole |

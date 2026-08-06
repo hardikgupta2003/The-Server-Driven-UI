@@ -46,7 +46,7 @@ file needs to change for a layout/content/copy change — that's the point.
 launch" here means "edit the file, rebuild" rather than a true hot-reload
 over the network; swapping the mock loader for a real HTTP call is a
 one-function change in
-[`JsonPageLoader.kt`](app/src/main/java/com/hardik/the_server_driven_ui/sdui/loader/JsonPageLoader.kt)
+[`JsonPageLoader.kt`](sdui/src/main/java/com/hardik/the_server_driven_ui/sdui/loader/JsonPageLoader.kt)
 and the live-edit story becomes a real server-push story with zero
 renderer changes.)
 
@@ -81,7 +81,9 @@ variant map instead of an expression language, why styling is centralized)
 lives in [`SCHEMA.md`](SCHEMA.md) — that document is the actual design
 artifact this system is built from, not written after the fact.
 
-Key packages under `app/src/main/java/.../sdui/`:
+Key packages under `sdui/src/main/java/com/hardik/the_server_driven_ui/sdui/`
+— the SDUI core lives in its own `:sdui` Gradle module, not inside `:app`,
+so it's the reusable half of this repo, not page-specific glue code:
 
 | Package | Responsibility |
 |---|---|

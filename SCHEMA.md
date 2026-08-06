@@ -93,10 +93,10 @@ Fields:
 
 | Category | Types | Notes |
 |---|---|---|
-| Layout primitives | `Row`, `Column`, `Grid`, `CarouselRail` | Generic containers, take `children`. `Grid` takes `columns` in props. `CarouselRail` takes `itemWidth`/`peekNext`. |
-| Leaf | `Text`, `Image`, `Spacer`, `Divider`, `Badge` | Single-purpose, no children. |
-| Interactive leaf | `Button`, `ChipRow`, `Tag` | Fire `actions`. |
-| Composite/domain | `CarCard`, `BannerCarousel`, `SearchHeader`, `ValuePropStrip`, `FooterCta` | Pre-arranged combinations of primitives, exposed as one type because they recur often enough on Cars24-style pages to be worth naming — but internally they're just composed from the same primitives, so a *new* composite the client doesn't have yet degrades to `UnknownComponent`, not a crash. |
+| Layout primitives | `Row`, `Column`, `Grid`, `CarouselRail` | Generic containers, take `children`. `Grid` takes `columns` in props; `CarouselRail`/`Grid` both take the shared `titleBadgeLabel`/`trailingActionLabel` slot (see `COVERAGE.md`'s cross-cutting mechanisms). |
+| Leaf | `Text`, `Image`, `Spacer`, `Divider` | Single-purpose, no children. |
+| Interactive leaf | `Button`, `ChipRow`, `TextField` | Fire `actions`; `TextField` additionally writes every keystroke to state via `stateKey`. |
+| Composite/domain | `CarCard`, `BannerCarousel`, `SearchHeader`, `ValuePropStrip`, `FooterCta`, `Chip`, `ListRow` | Pre-arranged combinations of primitives, exposed as one type because they recur often enough on Cars24-style pages to be worth naming — but internally they're just composed from the same primitives, so a *new* composite the client doesn't have yet degrades to `UnknownComponent`, not a crash. |
 
 Full registry table with prop schemas lives in `COVERAGE.md`.
 
